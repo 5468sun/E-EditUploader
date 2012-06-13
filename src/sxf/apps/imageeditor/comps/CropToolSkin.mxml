@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		xmlns:s="library://ns.adobe.com/flex/spark" 
+		xmlns:mx="library://ns.adobe.com/flex/mx">
+	<s:layout>
+		<s:HorizontalLayout />
+	</s:layout>
+	<!-- host component -->
+	<fx:Metadata>
+		[HostComponent("sxf.apps.imageeditor.comps.CropTool")]
+	</fx:Metadata>
+	
+	<!-- SkinParts
+	name=_hInput, type=spark.components.NumericStepper, required=true
+	name=_confirmBtn, type=spark.components.supportClasses.SkinnableComponent, required=true
+	name=_yInput, type=spark.components.NumericStepper, required=true
+	name=_cancelBtn, type=spark.components.supportClasses.SkinnableComponent, required=true
+	name=_xInput, type=spark.components.NumericStepper, required=true
+	name=_wInput, type=spark.components.NumericStepper, required=true
+	-->
+	<s:NumericStepper id="_xInput" maximum="10000" minimum="0" />
+	<s:NumericStepper id="_yInput" maximum="10000" minimum="0" />
+	
+	<s:NumericStepper id="_wInput" maximum="10000" minimum="0" />
+	<s:NumericStepper id="_hInput" maximum="10000" minimum="0" />
+	
+	<s:Button id="_confirmBtn" label="确定"/>
+	<s:Button id="_cancelBtn" label="取消"/>
+</s:Skin>

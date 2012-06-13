@@ -1,0 +1,22 @@
+# Build and Release Folders
+bin-debug/
+bin-release/
+
+# Project property files
+.actionScriptProperties
+.flexProperties
+.settings/
+.project
+
+
+# Flash Builder
+.FlexUnitSettings/
+
+# My Convention
+_bak/
+libs/
+assets/
+
+# Project Spec
+src/sxf/apps/edituploader
+src/sxf/apps/imageuploader

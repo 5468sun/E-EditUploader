@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		xmlns:s="library://ns.adobe.com/flex/spark" 
+		xmlns:mx="library://ns.adobe.com/flex/mx">
+	<!-- host component -->
+	<s:layout>
+		<s:HorizontalLayout/>
+	</s:layout>
+	<fx:Metadata>
+		[HostComponent("sxf.apps.imageeditor.comps.RotateFlipTool")]
+	</fx:Metadata>
+	
+	<!-- SkinParts
+	name=_rotateLeftBtn, type=spark.components.SkinnableComponent, required=true
+	name=_rotateRightBtn, type=spark.components.supportClasses.SkinnableComponent, required=true
+	name=_flipHorizontalBtn, type=spark.components.SkinnableComponent, required=true
+	name=_flipVerticalBtn, type=spark.components.supportClasses.SkinnableComponent, required=true
+	name=_cancelBtn, type=spark.components.SkinnableComponent, required=true
+	-->
+	<s:Button id="_rotateLeftBtn" label="左转"/>
+	<s:Button id="_rotateRightBtn" label="右转"/>
+	<s:Button id="_flipHorizontalBtn" label="水平翻转"/>
+	<s:Button id="_flipVerticalBtn" label="垂直翻转"/>
+	<s:Button id="_cancelBtn" label="取消"/>
+</s:Skin>

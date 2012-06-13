@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   minWidth="450" minHeight="430" 
+			   width="100%" height="100%"
+			   name="imageEditor"
+			   creationComplete="imageEditor_creationCompleteHandler(event)" xmlns:comps="sxf.apps.imageeditor.comps.*" xmlns:line="sxf.utils.line.*" xmlns:image="sxf.utils.image.*" xmlns:cropselector="sxf.utils.selector.cropselector.*">
+	<s:layout>
+		<s:VerticalLayout/>
+	</s:layout>
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			
+			import sxf.apps.imageeditor.events.ImageEditorEvent;
+			import sxf.apps.imageeditor.mvc.ImageEditorFacade;
+			import sxf.apps.imageeditor.mvc.controller.CropSelectCommand;
+			import sxf.apps.imageeditor.mvc.controller.EditImageCommand;
+			import sxf.apps.imageeditor.mvc.controller.LoadImageCommand;
+			import sxf.apps.imageeditor.mvc.model.ImageEditorProxy;
+			import sxf.apps.imageeditor.mvc.model.ImageService;
+			import sxf.apps.imageeditor.mvc.view.AntLineSelectorMediator;
+			import sxf.apps.imageeditor.mvc.view.CropSelectorMediator;
+			import sxf.apps.imageeditor.mvc.view.CropToolMediator;
+			import sxf.apps.imageeditor.mvc.view.CropperMediator;
+			import sxf.apps.imageeditor.mvc.view.EditorToolsMediator;
+			import sxf.apps.imageeditor.mvc.view.ImageDisplayMediator;
+			import sxf.apps.imageeditor.mvc.view.ImageEditorMediator;
+			import sxf.apps.imageeditor.mvc.view.ImageStageMediator;
+			import sxf.apps.imageeditor.mvc.view.ImgMapperMediator;
+			import sxf.apps.imageeditor.mvc.view.RotateFlipToolMediator;
+			import sxf.apps.imageeditor.mvc.view.TopInfoMediator;
+			import sxf.apps.imageeditor.mvc.view.ZoomToolMediator;
+			
+			protected function imageEditor_creationCompleteHandler(event:FlexEvent):void
+			{
+				
+				startUpConfig();
+				loadImage("../assets/Sunset.jpg");
+				
+			}
+			
+			private function startUpConfig():void
+			{
+				var facade:ImageEditorFacade = ImageEditorFacade.getInstance();
+				
+				facade.registerProxy(new ImageService);
+				facade.registerProxy(new ImageEditorProxy);
+				
+				facade.registerMediator(new ImageEditorMediator(this));
+				//facade.registerMediator(new TopInfoMediator(topInfo));
+				//facade.registerMediator(new ImageDisplayMediator(imageDisplay));
+				facade.registerMediator(new CropSelectorMediator(cropSelector));
+				facade.registerMediator(new CropToolMediator(cropTool));
+				facade.registerMediator(new RotateFlipToolMediator(rotateFlipTool));
+				facade.registerMediator(new ZoomToolMediator(zoomTool));
+				facade.registerMediator(new ImageStageMediator(imageStage));
+				//facade.registerMediator(new EditorToolsMediator(editorTool));
+				//facade.registerMediator(new ImgMapperMediator(imgMapper));
+				//facade.registerMediator(new CropperMediator(cropSelector));
+				//facade.registerMediator(new AntLineSelectorMediator(anlineSelector));
+				
+				
+				
+				facade.registerCommand(ImageEditorFacade.LOAD_IMAGE,LoadImageCommand);
+				facade.registerCommand(ImageEditorFacade.LOAD_IMAGE_BEGIN,LoadImageCommand);
+				facade.registerCommand(ImageEditorFacade.LOAD_IMAGE_PROGRESS,LoadImageCommand);
+				facade.registerCommand(ImageEditorFacade.LOAD_IMAGE_FINISH,LoadImageCommand);
+				facade.registerCommand(ImageEditorFacade.LOAD_IMAGE_UNLOAD,LoadImageCommand);
+				facade.registerCommand(ImageEditorFacade.LOAD_IMAGE_ERROR,LoadImageCommand);
+				
+				facade.registerCommand(ImageEditorFacade.IMAGE_INIT,EditImageCommand);
+				facade.registerCommand(ImageEditorFacade.IMAGE_ZOOM,EditImageCommand);
+				facade.registerCommand(ImageEditorFacade.IMAGE_FLIP,EditImageCommand);
+				facade.registerCommand(ImageEditorFacade.IMAGE_ROTATE,EditImageCommand);
+				facade.registerCommand(ImageEditorFacade.IMAGE_CROP,EditImageCommand);
+				facade.registerCommand(ImageEditorFacade.IMAGE_RESIZE,EditImageCommand);
+				facade.registerCommand(ImageEditorFacade.IMAGE_RESET,EditImageCommand);
+				facade.registerCommand(ImageEditorFacade.IMAGE_DRAG,EditImageCommand);
+				facade.registerCommand(ImageEditorFacade.IMAGE_CENTER,EditImageCommand);
+				
+				facade.registerCommand(ImageEditorFacade.CROP_RECTANGLE_CHANGE,CropSelectCommand);
+				facade.registerCommand(ImageEditorFacade.SELECT_RECTANGLE_CHANGE,CropSelectCommand);
+				facade.registerCommand(ImageEditorFacade.CROP_RESTRAIN_CHANGE,CropSelectCommand);
+				//facade.registerCommand(ImageEditorFacade.CROP_MOUSE_LOCATION,CropSelectCommand);
+				
+				
+			}
+			
+			private function loadImage(url:String):void
+			{
+				dispatchEvent(new ImageEditorEvent(ImageEditorEvent.LOAD_IMAGE,false,false,url));
+			}
+			
+
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<comps:TopInfo id="topInfo" width="100%" height="20" />
+	<s:BorderContainer id="editAreaContainer" borderColor="0xff0000" width="100%" height="100%">
+		<s:layout>
+			<s:VerticalLayout paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10"/>
+		</s:layout>
+		<s:SkinnableContainer id="editArea" width="100%" height="100%" backgroundColor="0xcccccc">
+			<comps:ImageStage id="imageStage" width="100%" height="100%" />
+			<!--<comps:ImageDisplay id="imageDisplay"/>-->
+			<!--<line:AntLineRectSelector id="anlineSelector" visible="false" useCustomRestrainRect="false"/>
+			<image:Cropper id="cropSelector" visible="false" useCustomRestrainRect="true"/>-->
+			<cropselector:CropSelector id="cropSelector" width="100%" height="100%" />
+			
+			<comps:ImgMapper id="imgMapper" right="10" top="10" />
+		</s:SkinnableContainer>
+		
+	</s:BorderContainer>
+	<!--<comps:EditorTools id="editorTool"/>-->
+	<comps:CropTool id="cropTool" skinClass="sxf.apps.imageeditor.comps.CropToolSkin" />
+	<comps:RotateFlipTool id="rotateFlipTool" skinClass="sxf.apps.imageeditor.comps.RotateFlipToolSkin" />
+	<comps:ZoomTool id="zoomTool" skinClass="sxf.apps.imageeditor.comps.ZoomToolSkin" />
+</s:Application>

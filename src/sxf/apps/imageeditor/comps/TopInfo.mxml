@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 name="topInfo" width="100%" height="100%">
+	<s:layout>
+		<s:HorizontalLayout/>
+	</s:layout>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			public function updateName(value:String):void
+			{
+				fileName.text = value;
+			}
+			
+			public function updateType(value:String):void
+			{
+				fileType.text = value;
+			}
+			
+			public function updateSize(value:String):void
+			{
+				fielSize.text = value;
+			}
+		]]>
+	</fx:Script>
+	<s:Label text="文件名"/>
+	<s:Label id="fileName"/>
+	<s:Label text="类型"/>
+	<s:Label id="fileType"/>
+	<s:Label text="尺寸"/>
+	<s:Label id="fielSize"/>
+</s:Group>

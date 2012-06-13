@@ -1,0 +1,1064 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 name="imageDisplay" width="100%" height="100%"
+		 clipAndEnableScrolling="true">
+	<s:layout>
+		<s:BasicLayout/>
+	</s:layout>
+	<fx:Script>
+		<![CDATA[
+			import mx.core.BitmapAsset;
+			import mx.events.EffectEvent;
+			import mx.events.FlexEvent;
+			import mx.events.ResizeEvent;
+			import mx.managers.DragManager;
+			
+			import spark.components.BorderContainer;
+			import spark.primitives.Graphic;
+			import spark.primitives.Rect;
+			
+			import sxf.apps.imageeditor.events.ImageDisplayEvent;
+			import sxf.apps.imageeditor.valueobjects.ImageDisplayInfo;
+			import sxf.utils.image.ImageFlipper;
+			import sxf.utils.image.ImageResizer;
+			import sxf.utils.image.ResizeMath;
+			
+			
+			private var dragPoint:Point;
+			private var imgBounds:Array = [];
+			
+			
+			private var _bitmapData:BitmapData;
+			private var _bakBitmapData:BitmapData;
+
+			
+			private var bmpWidth:Number;
+			private var bmpHeight:Number;
+			
+			private var imgWidth:Number;
+			private var imgHeight:Number;
+			
+			private var stageWidth:Number;
+			private var stageHeight:Number;
+			
+			private var viewPortWidth:Number;
+			private var viewPortHeight:Number;
+			
+			private var minZoomValue:Number;
+			private var maxZoomValue:Number = 8;
+			private var currentZoomValue:Number = 1;
+			private var prevZoomValue:Number;
+			private var zoomStep:Number = 0.5;
+			private var fitZoomValue:Number;
+			
+			private var prevMinZoomValue:Number;
+			private var prevFitZoomValue:Number;
+			
+			private var prevImgX:Number;
+			private var prevImgY:Number;
+			
+			private var safePadding:Number = 10;
+			
+			
+			private var mouseHeldDown:Boolean = false;
+			private var dragInitPoint:Point;
+			
+			//private var _imgSelection:Rectangle;
+			
+			
+			
+			//new   ///////////////////////////////////////////////////////////////
+			
+			public function updateImageBmpData(bmpData:BitmapData):void
+			{
+				var bmp:BitmapAsset = new BitmapAsset(bmpData);
+				imgObj.source = bmp;
+				
+			}
+			
+			public function applyMatrix(matrix:Matrix):void
+			{
+				imgObj.transform.matrix = matrix;
+			}
+			
+			protected function initializeHandler(event:FlexEvent):void
+			{
+				/* addEventListener(FlexEvent.CREATION_COMPLETE,createCompleteHandler);
+				addEventListener(Event.RESIZE,resizeHandler); */
+			}
+			
+			protected function createCompleteHandler(event:FlexEvent):void
+			{
+				/* stageWidth = this.width;
+				stageHeight = this.height;
+				
+				viewPortWidth = stageWidth - safePadding*2;
+				viewPortHeight = stageHeight - safePadding*2;
+				
+				addEventListener(Event.RESIZE,resizeHandler); */
+			}
+			protected function resizeHandler(event:ResizeEvent):void
+			{
+				/* stageWidth = this.width;
+				stageHeight = this.height;
+				viewPortWidth = stageWidth - safePadding*2;
+				viewPortHeight = stageHeight - safePadding*2;
+				
+				var newBmpData:BitmapData = this.bmpData.clone();
+				initStage(newBmpData); */
+				
+			}
+			////////////////////////////////////////////////////////////////////
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			public function get bmpData():BitmapData{
+			
+				return _bitmapData;
+				
+			}
+			
+			public function set bmpData(value:BitmapData):void{
+			
+				_bitmapData = value;
+			
+			}
+			
+			public function get bakBitmapData():BitmapData{
+				
+				return _bakBitmapData;
+			}
+			
+			public function set bakBitmapData(value:BitmapData):void{
+				
+				_bakBitmapData = value;
+			}
+			
+			public function initStage(bitmapData:BitmapData):void
+			{
+				if(this.bmpData){
+				
+					this.bmpData.dispose();
+				}
+				
+				updateImage(bitmapData);
+				
+				sendInitInfo();
+				
+			}
+			
+			/* public function get imgSelection():Rectangle{
+			
+				return this._imgSelection;
+			
+			}
+			
+			public function set imgSelection(rect:Rectangle):void{
+			
+				this._imgSelection = rect;
+			
+			} */
+			
+			
+			/* public function zoomInImage():void{
+			
+				recordPrevData();
+				
+				var zoomValue:Number = calcTargetZoomValue(zoomStep);
+				zoomImage(zoomValue);
+
+				sendZoomInfo();
+
+			}
+			
+			public function zoomOutImage():void{
+				
+				recordPrevData();
+
+				
+				var zoomValue:Number = calcTargetZoomValue(-zoomStep);
+				zoomImage(zoomValue);
+
+				
+				sendZoomInfo();
+				
+			}
+			
+			public function flipImageHorizontal():void{
+				
+				recordPrevData();
+				
+				var flippedBmpData:BitmapData = ImageFlipper.flipHorizontal(this.bmpData);
+				updateImage(flippedBmpData);
+				
+				sendFlipInfo();
+				
+			}
+			
+			public function flipImageVertical():void{
+
+				recordPrevData();
+				
+				var flippedBmpData:BitmapData = ImageFlipper.flipVertical(this.bmpData);
+				updateImage(flippedBmpData);
+				
+				sendFlipInfo();
+				
+			}
+			public function rotateImage(radian:Number):void{
+				
+				recordPrevData();
+				
+				var rotatedBmpData:BitmapData = getRotatedBmpData(this.bmpData,radian);
+				
+				updateImage(rotatedBmpData);
+				centerImage();
+				
+				sendRotateInfo();
+			}
+			public function rotateImgClockwise():void{
+				
+				recordPrevData();
+				
+				var radian:Number = Math.PI/2;
+				var rotatedBmpData:BitmapData = getRotatedBmpData(this.bmpData,radian);
+				
+				updateImage(rotatedBmpData);
+				centerImage();
+				
+				sendRotateInfo();
+				
+			}
+			
+			public function rotateImgCtClockwise():void{
+
+				recordPrevData();
+				
+				var radian:Number = -Math.PI/2;
+				var rotatedBmpData:BitmapData = getRotatedBmpData(this.bmpData,radian);
+				
+				updateImage(rotatedBmpData);
+				centerImage();
+				
+				sendRotateInfo();
+				
+			} */
+			
+			public function moveImageByMapper(smallViewPortX:Number,smallViewPortY:Number,smallViewPortWidth:Number,smallViewPortHeight:Number,smallImgWidth:Number,smallImgHeight:Number):void{
+				
+				recordPrevData();
+				
+				var imgPosX:Number;
+				var imgPosY:Number;
+				
+				if(smallViewPortX<=0){
+					
+					imgPosX = 0;
+					
+				}else if(smallViewPortX >= (smallImgWidth - smallViewPortWidth)){
+					
+					imgPosX = viewPortWidth - imgWidth;
+					
+				}else{
+					imgPosX = -smallViewPortX*(imgWidth/smallImgWidth);
+				}
+				
+				if(smallViewPortY<=0){
+					
+					imgPosY = 0;
+					
+				}else if(smallViewPortY >= (smallImgHeight - smallViewPortHeight)){
+
+					imgPosY = viewPortHeight - imgHeight;
+					
+				}else{
+					imgPosY = -smallViewPortY*(imgHeight/smallImgHeight);
+				}
+				
+				if(imgWidth < viewPortWidth){
+					
+					imgObj.x = Math.round(imgPosX + (viewPortWidth - imgWidth)/2 + safePadding);
+					
+				}else{
+					
+					imgObj.x = Math.round(imgPosX + safePadding);
+					
+				}
+				
+				if(imgHeight<viewPortHeight){
+					
+					imgObj.y = Math.round(imgPosY + (viewPortHeight - imgHeight)/2 + safePadding);
+				
+				}else{
+					
+					imgObj.y = Math.round(imgPosY + safePadding);
+				
+				}
+				
+				
+				sendMapperMoveInfo();
+			}
+			
+			/* public function resizeImage(width:Number,height:Number):void{
+
+				var resizedBmpData:BitmapData = ImageResizer.bilinearIterative(this.bmpData,width,height,ResizeMath.METHOD_PAN_AND_SCAN);
+				initStage(resizedBmpData);
+			
+			}
+			
+			public function recoverImage():void{
+			
+				initStage(this.bakBitmapData.clone());
+			}
+			
+			public function cropImage(clipRect:Rectangle):void{
+
+				var resultBmpData:BitmapData = new BitmapData(clipRect.width,clipRect.height);
+				resultBmpData.copyPixels(this.bmpData,clipRect,new Point(0,0));
+				initStage(resultBmpData);
+			
+			} */
+			/* public function updateImageSelection(rectangle:Rectangle):void{
+			
+				var x:Number = rectangle.x - imgObj.x;
+				var y:Number = rectangle.y - imgObj.y;
+				var w:Number = Math.round(rectangle.width/currentZoomValue);
+				var h:Number = Math.round(rectangle.height/currentZoomValue);
+				
+				imgSelection = new Rectangle(x,y,w,h);
+				
+				var infoObj:ImageDisplayInfo = getInfo(false);
+				dispatchEvent(new ImageDisplayEvent(ImageDisplayEvent.IMAGE_SELECTION_CHANGE,false,false,infoObj));
+				
+			
+			} */
+			
+			private function updateImage(bitmapData:BitmapData):void{
+				
+				bmpData = bitmapData;
+				
+				imgWidth = bmpData.width;
+				imgHeight = bmpData.height;
+				
+				bmpWidth = bmpData.width;
+				bmpHeight = bmpData.height;
+				
+				prevFitZoomValue = fitZoomValue;
+				prevMinZoomValue = minZoomValue;
+				
+				fitZoomValue = calcFitZoomValue();
+				minZoomValue = calcMinZoomValue();
+				
+				displayImage(bmpData);
+				
+				initZoomImage();
+				
+			}
+			
+			private function initZoomImage():void{
+			
+				var imgWidth:Number = this.imgWidth;
+				var imgHeight:Number = this.imgHeight;
+				var viewPortWidth:Number = this.viewPortWidth;
+				var viewPortHeight:Number = this.viewPortHeight;
+				
+				if(!prevFitZoomValue && !prevMinZoomValue){//图片开始载入
+
+					if(imgWidth>viewPortWidth || imgHeight>viewPortHeight){
+						
+						zoomImage(fitZoomValue);
+					
+					}else{
+						
+						zoomImage(minZoomValue);
+					
+					}
+				
+				}else{
+				
+					zoomImage(currentZoomValue);
+				
+				}
+				
+				
+				
+				if(currentZoomValue == prevFitZoomValue){//图片裁切或翻转
+					
+					zoomImage(fitZoomValue);
+					
+				}else if(currentZoomValue == prevMinZoomValue){
+					
+					zoomImage(minZoomValue);
+					
+				}
+			
+			}
+
+			
+			
+			private function zoomImage(scaleValue:Number):void{
+				
+				var stageWidth:Number = this.stageWidth;
+				var stageHeight:Number = this.stageHeight;
+				var stageCenterPoint:Point = this.localToGlobal(new Point(stageWidth/2,stageHeight/2));
+				var imgLocalPoint:Point = imgObj.globalToLocal(stageCenterPoint);
+
+				zoomImgAroundPoint(scaleValue,imgLocalPoint);
+				testImageDragDrop();
+				
+			}
+			
+			private function zoomImgAroundPoint(scaleValue:Number,point:Point):void{
+				
+				var point:Point = point;
+				
+				var p1:Point = imgObj.localToGlobal(point);
+
+				this.imgWidth = Math.round(bmpWidth*scaleValue); 
+				this.imgHeight = Math.round(bmpHeight*scaleValue);
+				
+				
+				imgObj.width = imgWidth;
+				imgObj.height = imgHeight;
+				
+				var pointAfterZoom:Point = new Point(point.x*scaleValue/currentZoomValue,point.y*scaleValue/currentZoomValue);
+				
+				var p2:Point = imgObj.localToGlobal(pointAfterZoom);
+
+				var offsetX:Number = Math.round(p1.x-p2.x);
+				var offsetY:Number = Math.round(p1.y-p2.y);
+
+				imgObj.x += offsetX;
+				imgObj.y += offsetY;
+				restrainPosImage();
+				
+				this.currentZoomValue = scaleValue;	
+
+			}
+			
+			private function restrainPosImage():void{
+			
+				if(imgWidth<=viewPortWidth){
+				
+					imgObj.x = Math.round((stageWidth-imgWidth)/2);
+				
+				
+				}else{
+					
+					if(imgObj.x>safePadding){
+					
+						imgObj.x = safePadding;
+					
+					}else if(imgObj.x < stageWidth - safePadding - imgWidth){
+					
+						imgObj.x = stageWidth - safePadding - imgWidth;
+					
+					}
+			
+				}
+				
+				
+				if(imgHeight<=viewPortHeight){
+				
+					imgObj.y = Math.round((stageHeight-imgHeight)/2);
+				
+				}else{
+				
+					if(imgObj.y>safePadding){
+					
+						imgObj.y = safePadding;
+					
+					}else if(imgObj.y < stageHeight - safePadding - imgHeight){
+					
+						imgObj.y = stageHeight - safePadding - imgHeight;
+					
+					}
+
+				
+				} 
+			
+			}
+			
+			
+			
+			/* private function rotateImgAroundPoint(radian:Number,point:Point):void{
+				
+				var proxyRect:Rect = new Rect();
+				var point:Point = point;
+				var p1:Point = imgObj.localToGlobal(point);
+				var m1:Matrix = imgObj.transform.matrix;
+				
+				//m1.rotate(radian);
+				m1.b = radian;
+				m1.c = radian;
+				
+				imgObj.transform.matrix = m1;
+				
+				var p2:Point = imgObj.localToGlobal(point);
+				var m2:Matrix = imgObj.transform.matrix;
+				//trace(p1);
+				//trace(p2);
+				m2.translate((p1.x-p2.x),(p1.y-p2.y));
+				imgObj.transform.matrix = m2;
+				
+				//trace(imgObj.getBounds(this));
+				this.imgWidth = imgObj.getLayoutBoundsWidth(); 
+				this.imgHeight = imgObj.getLayoutBoundsHeight();
+				
+			
+				
+			} */
+			
+			private function dragImage():void{
+				trace("dragImage");
+				trace(imgObj.transform.matrix);
+				recordPrevData();
+				
+				var gDragInitPoint:Point = imgObj.localToGlobal(dragInitPoint);
+				var dragInitPoint:Point = this.globalToLocal(gDragInitPoint);
+				var dragEndPoint:Point = new Point(this.mouseX,this.mouseY);
+				var dragOffsetX:Number = Math.round(dragEndPoint.x - dragInitPoint.x);
+				var dragOffsetY:Number = Math.round(dragEndPoint.y - dragInitPoint.y);
+				
+
+				if(imgWidth>viewPortWidth){
+					
+					if((imgObj.x + dragOffsetX)>(safePadding)){
+						
+						dragOffsetX = safePadding - imgObj.x;
+						
+					}else if((imgObj.x + dragOffsetX)<(stageWidth - safePadding - imgWidth)){
+						
+						dragOffsetX = stageWidth - safePadding - imgWidth - imgObj.x;
+						
+					}
+					
+				}else{
+					
+					dragOffsetX = 0;
+					
+				}
+				
+				if(imgHeight>viewPortHeight){
+					
+					if((imgObj.y + dragOffsetY)>(safePadding)){
+						
+						dragOffsetY = safePadding - imgObj.y;
+						
+					}else if((imgObj.y + dragOffsetY)<(stageHeight - safePadding - imgHeight)){
+						
+						dragOffsetY = stageHeight - safePadding - imgHeight - imgObj.y;
+						
+					}
+					
+					
+				}else{
+				
+					dragOffsetY = 0;
+				
+				}
+				
+				imgObj.x += dragOffsetX;
+				imgObj.y += dragOffsetY;
+				
+				sendDragMoveInfo();
+				
+			}
+			
+			
+			
+			private function displayImage(bitmapData:BitmapData):void
+			{
+				var bmpAsset:BitmapAsset = new BitmapAsset(bitmapData);
+				imgObj.transform.matrix = new Matrix();
+				imgObj.source = bmpAsset;
+
+				imgObj.width = imgWidth;
+				imgObj.height = imgHeight;
+				
+			}
+			private function centerImage():void{//place the  image to the center of the container
+			
+				
+				var imgWidth:Number = this.imgWidth;
+				var imgHeight:Number = this.imgHeight;
+				var stageWidth:Number = this.stageWidth;
+				var stageHeight:Number = this.stageHeight;
+				var x:Number = imgObj.getLayoutBoundsX();
+				var y:Number = imgObj.getLayoutBoundsY();
+				var offsetX:Number = (stageWidth - imgWidth)/2 - x;
+				var offsetY:Number = (stageHeight - imgHeight)/2 - y;
+				
+				
+				imgObj.x += offsetX;
+				imgObj.y += offsetY;
+			}
+
+			private function recordPrevData():void{
+			
+				prevImgX = imgObj.x;
+				prevImgY = imgObj.y;
+				prevZoomValue = currentZoomValue;
+			
+			}
+			
+			
+			private function testImageDragDrop():void{
+				
+				var imgWidth:Number = this.imgWidth;
+				var imgHeight:Number = this.imgHeight;
+				var viewPortWidth:Number = this.viewPortWidth;
+				var viewPortHeight:Number = this.viewPortHeight;
+				
+				if(imgWidth>viewPortWidth || imgHeight>viewPortHeight){
+					
+					trace("enableImageDragDrop();");
+					enableImageDragDrop();
+					
+				}else{
+					trace("disableImageDragDrop();");
+					disableImageDragDrop();
+					
+				}
+				
+				
+			}
+			private function enableImageDragDrop():void{
+				
+				imgObj.addEventListener(MouseEvent.MOUSE_DOWN,onImageMouseDown);
+				
+			}
+			
+			private function disableImageDragDrop():void{
+				
+				imgObj.removeEventListener(MouseEvent.MOUSE_DOWN,onImageMouseDown);
+				
+			}
+			
+			
+			/*触发事件*/
+			
+			private function sendInitInfo():void{
+			
+				var infoObj:ImageDisplayInfo = getInfo(true);
+				
+				dispatchEvent(new ImageDisplayEvent(ImageDisplayEvent.IMAGE_INITED,false,false,infoObj));
+			}
+	
+			private function sendZoomInfo():void{
+			
+				var infoObj:ImageDisplayInfo = getInfo(false);
+				
+				dispatchEvent(new ImageDisplayEvent(ImageDisplayEvent.IMAGE_ZOOMED,false,false,infoObj));
+			
+			}
+			
+			private function sendDragMoveInfo():void{
+				
+				var infoObj:ImageDisplayInfo = getInfo(false);
+				
+				dispatchEvent(new ImageDisplayEvent(ImageDisplayEvent.IMAGE_DRAG_MOVED,false,false,infoObj));
+				
+			}
+			
+			private function sendMapperMoveInfo():void{
+				
+				var infoObj:ImageDisplayInfo = getInfo(false);
+				
+				dispatchEvent(new ImageDisplayEvent(ImageDisplayEvent.IMAGE_MAPPER_MOVED,false,false,infoObj));
+				
+			}
+			
+
+			private function sendRotateInfo():void{
+			
+				var infoObj:ImageDisplayInfo = getInfo(true);
+				
+				dispatchEvent(new ImageDisplayEvent(ImageDisplayEvent.IMAGE_ROTATED,false,false,infoObj));
+			
+			}
+			
+			private function sendFlipInfo():void{
+			
+				var infoObj:ImageDisplayInfo = getInfo(true);
+				
+				dispatchEvent(new ImageDisplayEvent(ImageDisplayEvent.IMAGE_FLIPPED,false,false,infoObj));
+			
+			}
+			
+			private function getInfo(imgUpdated:Boolean):ImageDisplayInfo{
+			
+				var infoObj:ImageDisplayInfo;
+				
+				var imgWidth:Number = this.imgWidth;
+				var imgHeight:Number = this.imgHeight;
+				var prevImgX:Number = this.prevImgX;
+				var prevImgY:Number = this.prevImgY;
+				var imgX:Number = imgObj.x;
+				var imgY:Number = imgObj.y;
+				var prevZoomValue:Number = this.prevZoomValue;
+				var currentZoomValue:Number = this.currentZoomValue;
+				var viewPortWidth:Number = this.viewPortWidth;
+				var viewPortHeight:Number = this.viewPortHeight;
+				var bmpData:BitmapData = imgUpdated?this.bmpData:null;
+				//var imgSelection:Rectangle = imgSelection?this.imgSelection:null;
+				
+				infoObj = new ImageDisplayInfo(imgWidth,imgHeight,prevImgX,prevImgY,imgX,imgY,prevZoomValue,currentZoomValue,viewPortWidth,viewPortHeight,bmpData);
+				return infoObj;
+			
+			}
+			
+	
+			///////////////////////////
+			//
+			// util function
+			//
+			//////////////////////////
+			
+			private function getRotatedBmpData(bmpData:BitmapData,radian:Number,transparent:Boolean=false,fillColor:int=0x000000):BitmapData{
+				
+				var tempBmp:Bitmap = new Bitmap(bmpData);
+				
+				tempBmp.rotation = radian*180/Math.PI;
+				var bmpBounds:Rectangle = tempBmp.getBounds(this);
+				
+				var rotatedBmpData:BitmapData = new BitmapData(bmpBounds.width,bmpBounds.height,transparent,fillColor);
+				
+				var matrix:Matrix = new Matrix();
+				matrix.translate(-bmpData.width / 2, -bmpData.height / 2);
+				matrix.rotate(radian);
+				matrix.translate(bmpData.height / 2, bmpData.width / 2);
+				
+				rotatedBmpData.draw(bmpData,matrix);
+				
+				return rotatedBmpData;
+				
+			}
+			
+			private function calLetterBoxScaleValue(contentWidth:Number,contentHeight:Number,containerWidth:Number,containerHeight:Number):Number
+			{
+				var scaleValue:Number = 1;
+				if(contentWidth/contentHeight >= containerWidth/containerHeight)
+				{
+					scaleValue = containerWidth/contentWidth;
+				}
+				else
+				{
+					scaleValue = containerHeight/contentHeight;
+				}
+				
+				return scaleValue;
+			}
+			
+			private function calcFitZoomValue():Number{
+			
+				var zoomValue:Number;
+				var imgWidth:Number = this.imgWidth;
+				var imgHeight:Number = this.imgHeight;
+				var viewPortWidth:Number = this.viewPortWidth;
+				var viewPortHeight:Number = this.viewPortHeight;
+				
+				//trace(imgWidth + "|" +imgHeight+ "|" +viewPortWidth+ "|" +viewPortHeight+ "|");
+				
+				if(imgWidth > viewPortWidth || imgHeight > viewPortHeight)
+				{
+					zoomValue = calLetterBoxScaleValue(imgWidth,imgHeight,viewPortWidth,viewPortHeight);
+					
+					//trace("zoomImageToFit scaleValue " + scaleValue);
+					/* imgObj.width = Math.round(imgObj.width*scaleValue);
+					imgObj.height = Math.round(imgObj.height*scaleValue);
+					imgContainer.width = imgObj.width;
+					imgContainer.height = imgObj.height; */
+				}else{
+				
+					zoomValue = 1;
+				
+				}
+				
+				return zoomValue;
+			
+			}
+			
+			private function calcTargetZoomValue(zoomStep:Number):Number{
+			
+				var targetZoomValue:Number;
+				var temZoomValue:Number = currentZoomValue + zoomStep;
+				
+				if(temZoomValue<minZoomValue){
+				
+					targetZoomValue = minZoomValue;
+					
+				}else if(temZoomValue>maxZoomValue){
+				
+					targetZoomValue = maxZoomValue;
+					
+				}else if(currentZoomValue<fitZoomValue && temZoomValue>fitZoomValue){
+				
+					targetZoomValue = fitZoomValue;
+				
+				}else if(currentZoomValue<1 && temZoomValue>1){
+				
+					targetZoomValue = 1;
+				
+				}else{
+				
+					targetZoomValue = temZoomValue;
+				
+				}
+				trace(targetZoomValue);
+				return targetZoomValue;
+			}
+			
+			/* private function enableImageDragDrop():void
+			{
+				//enable MouseDrag
+				imgObj.addEventListener(MouseEvent.MOUSE_DOWN,imgMouseDownHandler);
+				imgObj.addEventListener(MouseEvent.MOUSE_UP,imgMouseUpHandler);
+				imgObj.addEventListener(MouseEvent.MOUSE_OUT,imgMouseOutHandler);
+				
+			} */
+			
+			private function getImgBounds():Array
+			{
+				var x:Number = imgObj.getLayoutBoundsX();
+				var y:Number = imgObj.getLayoutBoundsY();
+				var w:Number = imgObj.getLayoutBoundsWidth();
+				var h:Number = imgObj.getLayoutBoundsHeight();
+				
+				return new Array(x,y,w,h);
+			}
+			
+			/*  private function radiansToDegrees(radians:Number):Number 
+			{
+				var degrees:Number = radians * (180 / Math.PI);
+				return degrees;
+			}
+			
+			private function degreesToRadians(degrees:Number):Number 
+			{
+				var radians:Number = degrees * (Math.PI / 180);
+				return radians;
+			}  */
+			/* private function createEditAreaMask():void
+			{
+				var mask:BorderContainer = new BorderContainer();
+				mask.percentWidth = 100;
+				mask.percentHeight = 100;
+				//imgObj.mask = mask;
+				//imgObj.maskType = "clip";
+				//addElement(mask);
+				
+			} */
+			
+			
+			
+			
+			
+			
+			private function calcMinZoomValue():Number{
+				
+				var minZoomValue:Number;
+				
+				var viewPortWidth:Number = this.viewPortWidth;
+				var viewPortHeight:Number = this.viewPortHeight;
+				var bmpWidth:Number = this.bmpWidth;
+				var bmpHeight:Number = this.bmpHeight;
+				
+				if(bmpWidth<viewPortWidth && bmpHeight<viewPortHeight){
+				
+					minZoomValue = 1;
+					
+				}else{
+					
+					if((bmpWidth/bmpHeight)>(viewPortWidth/viewPortHeight)){
+					
+						minZoomValue = viewPortWidth/bmpWidth;
+						//trace(viewPortWidth +"_"+ bmpWidth);
+						
+						
+					}else{
+					
+						minZoomValue = viewPortHeight/bmpHeight;
+						//trace(viewPortHeight +"_"+ bmpHeight);
+						
+					}
+					
+				}
+				
+				return minZoomValue;
+			
+			}
+			
+			
+			/////////////////////////
+			//
+			// handlers
+			//
+			/////////////////////////
+
+
+
+			 
+			
+			/* private function imgMouseDownHandler(e:MouseEvent):void
+			{
+				trace("mousddiwn");
+				dragTriggerTimer = new Timer(10,1);
+				dragTriggerTimer.addEventListener(TimerEvent.TIMER,mouseDownTimerHandler);
+				dragTriggerTimer.start();
+				dragPoint = new Point(e.localX,e.localY);
+			}
+			
+			private function imgMouseUpHandler(e:MouseEvent):void
+			{
+				if(!dragEnabled)
+				{
+					dragTriggerTimer.stop();
+				}
+				else
+				{
+					dragEnabled = false;
+					imgObj.stopDrag();
+					//imgContainer.removeEventListener(MouseEvent.MOUSE_MOVE,imgMouseMoveHandler);
+				}
+			}
+			
+			private function imgMouseOutHandler(e:MouseEvent):void
+			{
+				//imgContainer.stopDrag();
+				//imgContainer.removeEventListener(MouseEvent.MOUSE_MOVE,imgMouseMoveHandler);
+			}
+			
+			private function mouseDownTimerHandler(e:TimerEvent):void
+			{
+				dragEnabled = true;
+				trace("dragEnabled :" + dragEnabled);
+				imgObj.startDrag();
+				//imgContainer.addEventListener(MouseEvent.MOUSE_MOVE,imgMouseMoveHandler);
+			} */
+			
+			/* private function imgMouseMoveHandler(e:MouseEvent):void
+			{
+				imgBounds = getImgBounds();
+				var x:Number = imgBounds[0] + (e.localX - dragPoint.x);
+				var y:Number = imgBounds[y] + (e.localY - dragPoint.y);
+				
+				if(x<100-imgContainer.width)
+					x = 100-imgContainer.width;
+				if(x>this.width-100)
+					x = this.width - 100;
+				if(y<100-imgContainer.height)
+					y = 100-imgContainer.height;
+				if(y>this.height-100)
+					y = this.height - 100; 
+				imgContainer.x = x;
+				imgContainer.y = y; 
+				
+			} */
+
+			
+			//drag and drop handler
+			
+			private function onImageMouseDown(e:MouseEvent):void{
+				
+				mouseHeldDown = true;
+				dragInitPoint = new Point(e.localX,e.localY);
+				
+				imgObj.addEventListener(MouseEvent.MOUSE_MOVE,onImageMouseMove);
+				imgObj.addEventListener(MouseEvent.MOUSE_UP,onImageMouseUp);
+				stage.addEventListener(MouseEvent.MOUSE_UP, onStageMouseUp);
+			
+			}
+			private function onImageMouseMove(e:MouseEvent):void{
+				
+				trace("onImageMouseMove");
+				addEventListener(Event.ENTER_FRAME,onEnterFrame);
+				imgObj.removeEventListener(MouseEvent.MOUSE_MOVE,onImageMouseMove);
+				
+				
+			}
+			private function onEnterFrame(e:Event):void{
+				
+				dragImage();
+				trace("onEnterFrame");
+				
+			}
+			private function onImageMouseUp(e:MouseEvent):void{
+				
+				mouseHeldDown = false;
+				dragInitPoint = null;
+				trace("onImageMouseUp");
+				imgObj.removeEventListener(MouseEvent.MOUSE_UP,onImageMouseUp);
+				imgObj.removeEventListener(MouseEvent.MOUSE_MOVE,onImageMouseMove);
+				removeEventListener(Event.ENTER_FRAME,onEnterFrame);
+				stage.removeEventListener(MouseEvent.MOUSE_UP, onStageMouseUp);
+			
+			}
+			private function onStageMouseUp(e:MouseEvent):void{
+				
+				mouseHeldDown = false;
+				dragInitPoint = null;
+				trace("onStageMouseUp");
+				imgObj.removeEventListener(MouseEvent.MOUSE_UP,onImageMouseUp);
+				imgObj.removeEventListener(MouseEvent.MOUSE_MOVE,onImageMouseMove);
+				removeEventListener(Event.ENTER_FRAME,onEnterFrame);
+				stage.removeEventListener(MouseEvent.MOUSE_UP, onStageMouseUp);
+			
+			}
+			
+			
+			
+			
+
+
+			
+		]]>
+	</fx:Script>
+	<!--<s:Group id="imgContainer">
+		<s:BitmapImage id="imgObj"/>
+	</s:Group>-->
+	<mx:Image id="imgObj"/>
+	
+	
+	<!--<s:BitmapImage id="bmpImg"
+				   source="@Embed('assets/Sunset.jpg')"
+				   horizontalCenter="0" verticalCenter="0">
+		<s:mask>
+			<s:BorderContainer id="bmpMask"
+							   cornerRadius="10"
+							   width="{bmpImg.width}" height="{bmpImg.height}" />
+		</s:mask>
+	</s:BitmapImage>-->
+	
+	<!--<s:Group  id="mask" width="100%" height="100%">
+		<s:Rect width="100%" height="100%" alpha="0.9">
+			<s:fill>
+				<s:SolidColor color="0xcccccc"/>
+			</s:fill>
+		</s:Rect>
+	</s:Group>-->
+	
+</s:Group>

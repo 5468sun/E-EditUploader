@@ -1,0 +1,557 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" height="80"
+		 initialize="initializeHandler(event)"
+		 creationComplete="creationCompleteHandler(event)">
+	<s:layout>
+		<s:BasicLayout/>
+	</s:layout>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+
+			import sxf.apps.imageeditor.events.ResizeEvent;
+			import sxf.apps.imageeditor.events.ToolCropEvent;
+			import sxf.apps.imageeditor.events.ToolEvent;
+			import sxf.apps.imageeditor.events.ToolRotateFlipEvent;
+			import sxf.apps.imageeditor.events.ToolZoomEvent;
+			
+			private var cropWidthInputFocused:Boolean = false;
+			private var cropHeightInputFocused:Boolean = false;
+
+			private var keepRatio:Boolean;
+			private var ratioValue:Number;
+			
+			//private var _restrainRect:Rectangle;
+			
+			private var keepImageRatio:Boolean;
+			private var _imageRatioValue:Number;
+			
+			private var rect:Rectangle;
+			
+			/* public function get restrainRect():Rectangle{
+			
+			return this._restrainRect;
+			
+			}
+			
+			public function set restrainRect(rectangle:Rectangle):void{
+			
+			this._restrainRect = rectangle;
+			
+			} */
+			
+			public function get imageRatioValue():Number{
+				
+				return _imageRatioValue;
+			}
+			
+			public function set imageRatioValue(value:Number):void{
+				
+				_imageRatioValue = value;
+			}
+
+			
+			public function showMousePosition(initPoint:Point):void{
+			
+				cropXInput.value = initPoint.x;
+				cropYInput.value = initPoint.y;
+			
+			}
+			
+			public function resumeCropperPosition():void{
+			
+				if(rect){
+				
+					cropXInput.value = rect.x;
+					cropYInput.value = rect.y;
+				
+				}else{
+				
+					cropXInput.value = 0;
+					cropYInput.value = 0;
+				
+				}
+			
+			}
+			
+			public function updateCropInputs(rectangle:Rectangle):void{
+				
+				this.rect = rectangle;
+
+				cropXInput.value = rect.x;
+				cropYInput.value = rect.y;
+				cropWidthInput.value = rect.width;
+				cropHeightInput.value =rect.height;
+			
+			}
+			
+			public function updateResizeInputs(width:Number,height:Number):void{
+			
+				resizeWidthInput.text = String(width);
+				resizeHeightInput.text = String(height);
+			
+			}
+			
+			public function updateZoomValue(value:Number):void{
+			
+				currentZoomValue.text = String(Math.round(value*100))+"%";
+			
+			}
+			
+			public function updateActualSize(width:Number,height:Number):void{
+			
+				actualSize.text = String(width) +" x "+ String(height);
+			
+			}
+			
+			public function disableCropInputs():void{
+			
+				cropXInput.enabled = false;
+				cropYInput.enabled = false;
+				cropWidthInput.enabled = false;
+				cropHeightInput.enabled = false;
+				cropKeepRatioChk.enabled = false;
+			
+			}
+			
+			public function enableCropInputs():void{
+			
+				cropXInput.enabled = true;
+				cropYInput.enabled = true;
+				cropWidthInput.enabled = true;
+				cropHeightInput.enabled = true;
+				cropKeepRatioChk.enabled = true;
+			
+			}
+			
+			private function resetCropInputs():void{
+				
+				cropXInput.value = 0;
+				cropYInput.value = 0;
+				cropWidthInput.value = 0;
+				cropHeightInput.value = 0;
+				keepRatio = false;
+				cropKeepRatioChk.selected = false;
+			
+			}
+			
+			private function resetResizeInput():void{
+			
+				keepImageRatio = true;
+				resizeKeepRatioChk.selected = true;
+				
+			
+			}
+			
+			private function openCropTool():void{
+				
+				cropToolBox.visible = true;
+				rotateAndFlipToolBox.visible = false;
+				resizeToolBox.visible = false;
+				resetCropInputs();
+				
+			}
+			
+			private function closeCropTool():void{
+				
+				cropToolBox.visible = false;
+				
+			}
+			
+			private function openRotateAndFlipTool():void{
+				
+				cropToolBox.visible = false;
+				rotateAndFlipToolBox.visible = true;
+				resizeToolBox.visible = false;
+				
+				
+			}
+			
+			private function closeRotateAndFlipTool():void{
+				
+				rotateAndFlipToolBox.visible = false;
+				
+			}
+			
+			private function openResizeTool():void{
+				
+				cropToolBox.visible = false;
+				rotateAndFlipToolBox.visible = false;
+				resizeToolBox.visible = true;
+				resetResizeInput();
+				
+			}
+			
+			private function closeResizeTool():void{
+				
+				resizeToolBox.visible = false;
+				
+			}
+			
+			private function initEditTool():void{
+				
+				this.keepRatio = cropKeepRatioChk.selected?true:false;
+				disableCropInputs();
+				
+			}
+			
+			////////////////////////
+			//
+			// handler functions 
+			//
+			///////////////////////
+			protected function creationCompleteHandler(event:FlexEvent):void
+			{
+				zoomInBtn.addEventListener(MouseEvent.MOUSE_DOWN,zoomBtnClickHandler);
+				zoomOutBtn.addEventListener(MouseEvent.MOUSE_DOWN,zoomBtnClickHandler);
+				//zoomInBtn.addEventListener(FlexEvent.BUTTON_DOWN,zoomBtnDownHandler);
+				//zoomOutBtn.addEventListener(FlexEvent.BUTTON_DOWN,zoomBtnDownHandler);
+				//zoomLessBtn.addEventListener(MouseEvent.CLICK,zoomLessBtnClickHandler);
+				//rotateSlider.addEventListener(Event.CHANGE,rotateChangeHandler);
+				
+				rotateAndFlipBtn.addEventListener(MouseEvent.CLICK,rotateAndFlipBtnClickHandler);
+				rotateAndFlipCancelBtn.addEventListener(MouseEvent.CLICK,rotateAndFlipCancelBtnClickHandler);
+				rotateLeftBtn.addEventListener(MouseEvent.CLICK,rotateBtnClickHandler);
+				rotateRightBtn.addEventListener(MouseEvent.CLICK,rotateBtnClickHandler);
+				
+				//rotateLeftBtn.addEventListener(FlexEvent.BUTTON_DOWN,rotateBtnDownHandler);
+				//rotateRightBtn.addEventListener(FlexEvent.BUTTON_DOWN,rotateBtnDownHandler);
+				
+				
+				flipHorizontalBtn.addEventListener(MouseEvent.CLICK,flipBtnClickHandler);
+				flipVerticalBtn.addEventListener(MouseEvent.CLICK,flipBtnClickHandler);
+				
+				cropBtn.addEventListener(MouseEvent.CLICK,cropBtnClickHandler);
+				cropCancelBtn.addEventListener(MouseEvent.CLICK,cropCancelBtnClickHandler);
+				cropConfirmBtn.addEventListener(MouseEvent.CLICK,cropConfirmBtnClickHandler);
+				
+				cropKeepRatioChk.addEventListener(Event.CHANGE,cropKeepRatioChkChangeHandler);
+				//cropWidthInput.addEventListener(FocusEvent.FOCUS_IN,cropWidthInputFocusInHanlder);
+				//cropWidthInput.addEventListener(FocusEvent.FOCUS_OUT,cropWidthInputFocusOutHanlder);
+				cropWidthInput.addEventListener(Event.CHANGE,cropWidthInputChangeHanlder);
+				//cropHeightInput.addEventListener(FocusEvent.FOCUS_IN,cropHeightInputFocusInHanlder);
+				//cropHeightInput.addEventListener(FocusEvent.FOCUS_OUT,cropHeightInputFocusOutHanlder);
+				cropHeightInput.addEventListener(Event.CHANGE,cropHeightInputChangeHanlder);
+				cropXInput.addEventListener(Event.CHANGE,cropXYInputChangeHanlder);
+				cropYInput.addEventListener(Event.CHANGE,cropXYInputChangeHanlder);
+				
+				resizeBtn.addEventListener(MouseEvent.CLICK,resizeBtnClickHandler);
+				resizeCancelBtn.addEventListener(MouseEvent.CLICK,resizeCancelBtnClickHandler);
+				resizeConfirmBtn.addEventListener(MouseEvent.CLICK,resizeConfirmBtnClickHandler);
+				
+				resizeWidthInput.addEventListener(Event.CHANGE,resizeWidthInputChangeHandler);
+				resizeHeightInput.addEventListener(Event.CHANGE,resizeHeightInputChangeHandler);
+				resizeKeepRatioChk.addEventListener(Event.CHANGE,resizeKeepRatioChkChangeHandler);
+				
+				resetBtn.addEventListener(MouseEvent.CLICK,resetBtnClickHandler);
+				doneBtn.addEventListener(MouseEvent.CLICK,doneBtnClickHandler);
+				
+				
+			}
+			protected function initializeHandler(event:FlexEvent):void{
+				
+				initEditTool();
+			}
+			
+			private function cropBtnClickHandler(e:MouseEvent):void{
+			
+				openCropTool();
+				dispatchEvent(new ToolCropEvent(ToolCropEvent.BEGIN));
+				
+			}
+			
+			
+			
+			private function cropCancelBtnClickHandler(e:MouseEvent):void{
+			
+				closeCropTool();
+				dispatchEvent(new ToolCropEvent(ToolCropEvent.CANCEL));
+			
+			}
+			
+			private function cropConfirmBtnClickHandler(e:MouseEvent):void{
+			
+				closeCropTool();
+				dispatchEvent(new ToolCropEvent(ToolCropEvent.CONFIRM,false,false,false,NaN,rect));
+			
+			}
+			
+			private function rotateAndFlipBtnClickHandler(e:MouseEvent):void{
+				
+				openRotateAndFlipTool();
+				dispatchEvent(new ToolRotateFlipEvent(ToolRotateFlipEvent.BEGIN));
+				
+			}
+			
+			private function rotateAndFlipCancelBtnClickHandler(e:MouseEvent):void{
+			
+				closeRotateAndFlipTool();
+				dispatchEvent(new ToolRotateFlipEvent(ToolRotateFlipEvent.CANCEL));
+			
+			}
+			
+			private function resizeBtnClickHandler(e:MouseEvent):void{
+			
+				openResizeTool();
+				dispatchEvent(new ResizeEvent(ResizeEvent.BEGIN,false,false));
+			
+			}
+			
+			private function resizeCancelBtnClickHandler(e:MouseEvent):void{
+			
+				closeResizeTool();
+				dispatchEvent(new ResizeEvent(ResizeEvent.CANCLE,false,false));
+			
+			}
+			
+			private function resizeConfirmBtnClickHandler(e:MouseEvent):void{
+				
+				closeResizeTool();
+				var inputWidth:Number = Math.abs(Number(resizeWidthInput.text));
+				var inputHeight:Number = Math.abs(Number(resizeHeightInput.text));
+				
+				dispatchEvent(new ResizeEvent(ResizeEvent.RESIZE,false,false,inputWidth,inputHeight));
+				
+			}
+			
+			private function resetBtnClickHandler(e:MouseEvent):void{
+			
+				dispatchEvent(new ToolEvent(ToolEvent.RECOVER_IMAGE));
+			
+			}
+			
+			private function doneBtnClickHandler(e:MouseEvent):void{
+			
+				dispatchEvent(new ToolEvent(ToolEvent.IMAGE_EDIT_DONE));
+			
+			}
+			
+			private function zoomBtnClickHandler(e:MouseEvent):void{
+				
+				switch(e.target){
+					
+					case zoomInBtn:
+						dispatchEvent(new Event(ToolZoomEvent.ZOOM_IN_IMAGE));
+						break;
+					
+					case zoomOutBtn:
+						dispatchEvent(new Event(ToolZoomEvent.ZOOM_OUT_IMAGE));
+						break;
+				}
+				
+			}
+			
+			private function cropKeepRatioChkChangeHandler(e:Event):void{
+				
+				keepRatio = cropKeepRatioChk.selected?true:false;
+				var inputWidth:Number = Number(cropWidthInput.value);
+				var inputHeight:Number = Number(cropHeightInput.value);
+				
+				if(!inputWidth || !inputHeight){
+					
+					inputWidth = 1;
+					inputHeight = 1;
+					cropWidthInput.value = 1;
+					cropHeightInput.value = 1;
+					
+				}
+				ratioValue = inputWidth/inputHeight;
+				dispatchEvent(new ToolCropEvent(ToolCropEvent.RATIO_STATUS_CHANGE,false,false,keepRatio,ratioValue));
+			}
+			
+			private function cropXYInputChangeHanlder(e:Event):void{
+			
+				var inputX:Number = Math.abs(Number(cropXInput.value));
+				var inputY:Number = Math.abs(Number(cropYInput.value));
+				
+				var rect:Rectangle = new Rectangle(inputX,inputY,rect.width,rect.height);
+				dispatchEvent(new ToolCropEvent(ToolCropEvent.RECTANGLE_XY_CHANGE,false,false,keepRatio,ratioValue,rect));
+			
+			}
+			
+			private function cropWidthInputChangeHanlder(e:Event):void{
+				
+				var inputWidth:Number = Math.abs(Number(cropWidthInput.value));
+				var inputHeight:Number;
+
+				if(keepRatio){
+					
+					inputHeight = Math.round(inputWidth/ratioValue);
+					cropHeightInput.value = inputHeight;
+					
+				}else{
+				
+					inputHeight = Math.abs(Number(cropHeightInput.value));
+				
+				}
+				
+				var rect:Rectangle = new Rectangle(rect.x,rect.y,inputWidth,inputHeight);
+				dispatchEvent(new ToolCropEvent(ToolCropEvent.RECTANGLE_WH_CHANGE,false,false,keepRatio,ratioValue,rect));
+				
+				
+			}
+			
+			/* private function cropWidthInputFocusInHanlder(e:FocusEvent):void{
+			
+				//cropWidthInputFocused = true;
+			
+			}
+			
+			private function cropWidthInputFocusOutHanlder(e:FocusEvent):void{
+			
+				//cropWidthInputFocused = false;
+			
+			} */
+			
+			private function cropHeightInputChangeHanlder(e:Event):void{
+			
+				var inputWidth:Number;
+				var inputHeight:Number = Math.abs(Number(cropHeightInput.value));
+				
+				if(keepRatio){
+					
+					inputWidth = Math.round(inputHeight*ratioValue);
+					cropWidthInput.value = inputWidth;
+					
+				}else{
+				
+					inputWidth = Math.abs(Number(cropWidthInput.value));
+				
+				}
+				
+				var rect:Rectangle = new Rectangle(rect.x,rect.y,inputWidth,inputHeight);
+				dispatchEvent(new ToolCropEvent(ToolCropEvent.RECTANGLE_WH_CHANGE,false,false,keepRatio,ratioValue,rect));
+			
+			}
+			
+			
+			private function rotateBtnClickHandler(e:MouseEvent):void
+			{
+				switch(e.target)
+				{
+					case rotateLeftBtn:
+						dispatchEvent(new Event(ToolRotateFlipEvent.ROTATE_IMAGE_COUNTER_CLOCKWISE));
+						break;
+					
+					case rotateRightBtn:
+						dispatchEvent(new Event(ToolRotateFlipEvent.ROTATE_IMAGE_CLOCKWISE));
+						break;
+				}
+			}
+			
+			private function flipBtnClickHandler(e:MouseEvent):void{
+				
+				switch (e.target){
+					
+					case flipHorizontalBtn:
+						dispatchEvent(new Event(ToolRotateFlipEvent.FLIP_IMAGE_HORIZONTAL));
+						break;
+					
+					case flipVerticalBtn:
+						
+						dispatchEvent(new Event(ToolRotateFlipEvent.FLIP_IMAGE_VERTICAL));
+						break;
+					
+				}
+				
+			}
+
+			private function resizeKeepRatioChkChangeHandler(e:Event):void{
+			
+				this.keepImageRatio = resizeKeepRatioChk.selected?true:false;
+			
+			}
+			
+			private function resizeWidthInputChangeHandler(e:Event):void{
+				
+				var inputWidth:Number = Math.abs(Number(resizeWidthInput.text));
+				if(!inputWidth) return;
+				
+				if(keepImageRatio){
+
+					var inputHeight:Number = Math.round(inputWidth/imageRatioValue);
+					resizeHeightInput.text = String(inputHeight);
+				
+				}
+			
+			}
+			
+			private function resizeHeightInputChangeHandler(e:Event):void{
+			
+				var inputHeight:Number = Math.abs(Number(resizeHeightInput.text));
+				if(!inputHeight) return;
+				
+				if(keepImageRatio){
+					
+					var inputWidth:Number = inputHeight*imageRatioValue;
+					resizeWidthInput.text = String(inputWidth);
+					
+				}
+			
+			}
+
+		]]>
+	</fx:Script>
+	<s:VGroup  right="10" top="-50">
+		<s:HGroup>
+			<s:Button id="zoomInBtn" label="放大"/>
+			<s:Button id="zoomOutBtn" label="缩小"/>
+		</s:HGroup>
+		<s:HGroup>
+			<s:Label id="currentZoomValue"/>
+			<s:Label id="actualSize"/>
+		</s:HGroup>
+	</s:VGroup>
+	
+	<s:VGroup>
+		<s:HGroup>
+			<s:Button id="cropBtn" label="裁切"/>
+			<s:Button id="rotateAndFlipBtn" label="旋转"/>
+			<s:Button id="resizeBtn" label="调整尺寸"/>
+
+		</s:HGroup>
+		<s:Group>
+			<s:layout>
+				<s:BasicLayout/>
+			</s:layout>
+			<s:HGroup id="cropToolBox" visible="false">
+				<s:NumericStepper id="cropXInput" maximum="10000" minimum="0" />
+				<s:NumericStepper id="cropYInput" maximum="10000" minimum="0" />
+				
+				<s:NumericStepper id="cropWidthInput" maximum="10000" minimum="0" />
+				<s:NumericStepper id="cropHeightInput" maximum="10000" minimum="0" />
+				
+				<s:CheckBox id="cropKeepRatioChk" label="保持比例"/>
+				<s:Button id="cropConfirmBtn" label="确定"/>
+				<s:Button id="cropCancelBtn" label="取消"/>
+			</s:HGroup>
+			<s:HGroup id="rotateAndFlipToolBox" visible="false">
+				<s:Button id="rotateLeftBtn" label="左转"/>
+				<s:Button id="rotateRightBtn" label="右转"/>
+				<s:Button id="flipHorizontalBtn" label="水平翻转"/>
+				<s:Button id="flipVerticalBtn" label="垂直翻转"/>
+				<s:Button id="rotateAndFlipCancelBtn" label="取消"/>
+			</s:HGroup>
+			<s:HGroup id="resizeToolBox" visible="false">
+				<s:TextInput id="resizeWidthInput"/>
+				<s:TextInput id="resizeHeightInput"/>
+				<s:CheckBox id="resizeKeepRatioChk" label="保持比例"/>
+				<s:Button id="resizeConfirmBtn" label="确定"/>
+				<s:Button id="resizeCancelBtn" label="取消"/>
+			</s:HGroup>
+		</s:Group>
+		
+		
+	</s:VGroup>
+	
+	<s:HGroup right="10" top="0">
+		<s:Button id="doneBtn" label="完成"/>
+		<s:Label id="resetBtn" text="重置"/>
+	</s:HGroup>
+	
+</s:Group>
