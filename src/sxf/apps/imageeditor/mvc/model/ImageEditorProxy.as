@@ -5,6 +5,7 @@ package sxf.apps.imageeditor.mvc.model
 	import flash.geom.Matrix;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
+	import flash.utils.ByteArray;
 	
 	import org.puremvc.as3.patterns.proxy.Proxy;
 	
@@ -25,7 +26,7 @@ package sxf.apps.imageeditor.mvc.model
 		private var _bmpData:BitmapData;
 		
 		private var _matrix:Matrix = new Matrix();
-		private var _restrainRect:Rectangle;
+		private var _restrainRectangle:Rectangle;
 		private var _cropRectangle:Rectangle;
 		private var _selectRectangle:Rectangle;
 
@@ -47,12 +48,13 @@ package sxf.apps.imageeditor.mvc.model
 		private var _zoomStep:Number = 0.5;
 		
 		private var _currentZoomValue:Number = 1;
+		private var _currentRotateAngle:Number = 0;
 		private var _changeFlag:String;
 		
 		public function ImageEditorProxy(data:Object=null)
 		{
 			super(NAME, data);
-			_restrainRect = new Rectangle();
+			_restrainRectangle = new Rectangle();
 			_cropRectangle = new Rectangle();
 			_selectRectangle = new Rectangle();
 			padding = 10;
@@ -120,17 +122,17 @@ package sxf.apps.imageeditor.mvc.model
 		public function set matrix(value:Matrix):void
 		{}
 		
-		public function get restrainRect():Rectangle
+		public function get restrainRectangle():Rectangle
 		{
-			return _restrainRect;
+			return _restrainRectangle;
 		}
 		
-		public function set restrainRect(value:Rectangle):void
+		public function set restrainRectangle(value:Rectangle):void
 		{
-			if(!value.equals(_restrainRect))
+			if(!value.equals(_restrainRectangle))
 			{
-				_restrainRect = value;
-				sendNotification(ImageEditorFacade.CROP_RESTRAIN_CHANGE,restrainRect);
+				_restrainRectangle = value;
+				sendNotification(ImageEditorFacade.CROP_RESTRAIN_CHANGE,restrainRectangle);
 			}
 		}
 		
@@ -203,7 +205,7 @@ package sxf.apps.imageeditor.mvc.model
 			if(value != _padding)
 			{
 				_padding = value;
-				sendNotification(ImageEditorFacade.PADDING_CHANGE,_padding);
+				//sendNotification(ImageEditorFacade.PADDING_CHANGE,_padding);
 			}
 			
 		}
@@ -253,28 +255,29 @@ package sxf.apps.imageeditor.mvc.model
 		
 		public function initImage():void
 		{
+			sendNotification(ImageEditorFacade.IMAGE_INIT);
 			initTransform();
 		}
 		
 		//放大时以视窗的中心点为中心
 		public function zoomInImage():void
 		{
-			if(_zoomStep<0)_zoomStep = -_zoomStep;
+			if(_zoomStep<0) _zoomStep = -_zoomStep;
 			var zoomValue:Number = calcTargetZoomValue();
-			var anchor:Point = new Point(_viewPortWidth/2,_viewPortHeight/2);
-			zoomAroundExternalPoint(zoomValue,anchor);
-			moveImageToCenter();
+			var anchor:Point = new Point(_bmpDataWidth/2,_bmpDataHeight/2);
+			zoomAroundInternalPoint(zoomValue,anchor);
+			//moveImageToCenter();
 		}
 		
 		//缩小时以图片的中心点为中心
 		public function zoomOutImage():void
 		{
-			if(_zoomStep>0)_zoomStep = -_zoomStep;
+			if(_zoomStep>0) _zoomStep = -_zoomStep;
 
 			var zoomValue:Number = calcTargetZoomValue();
-			var anchor:Point = new Point(_imageWidth/2,_imageHeight/2);
+			var anchor:Point = new Point(_bmpDataWidth/2,_bmpDataHeight/2);
 			zoomAroundInternalPoint(zoomValue,anchor);
-			moveImageToCenter();
+			//moveImageToCenter();
 		}
 			
 		public function flipImageHorizontal():void
@@ -282,9 +285,9 @@ package sxf.apps.imageeditor.mvc.model
 			var matrix:Matrix = new Matrix();
 			matrix.scale(-1,1);
 			matrix.translate(_bmpDataWidth,0);
-			var bmpData:BitmapData = new BitmapData(_bmpDataWidth,_bmpDataHeight);
-			bmpData.draw(_bmpData,matrix);
-			_bmpData = bmpData;
+			matrix.concat(_matrix);
+			_matrix = matrix;
+			updateRestrainRect();
 			sendNotification(ImageEditorFacade.IMAGE_FLIP);
 		}
 		
@@ -293,40 +296,72 @@ package sxf.apps.imageeditor.mvc.model
 			var matrix:Matrix = new Matrix();
 			matrix.scale(1,-1);
 			matrix.translate(0,_bmpDataHeight);
-			var bmpData:BitmapData = new BitmapData(_bmpDataWidth,_bmpDataHeight);
-			bmpData.draw(_bmpData,matrix);
-			_bmpData = bmpData;
+			matrix.concat(_matrix);
+			_matrix = matrix;
+			updateRestrainRect();
 			sendNotification(ImageEditorFacade.IMAGE_FLIP);
 		}
 		
 		public function rotateImage(angle:Number):void
 		{
-			var matrix:Matrix = new Matrix();
-			matrix.translate(-_bmpDataWidth/2,-_bmpDataHeight/2);
-			matrix.rotate(angle);
-			matrix.translate(_bmpDataWidth/2,_bmpDataHeight/2);
-			var bmpDataBoundary:Rectangle = new Rectangle(0,0,_bmpDataWidth,_bmpDataHeight);
-			var newBmpDataBoundray:Rectangle = transformRectangle(bmpDataBoundary,matrix);
-			var newWidth:Number = newBmpDataBoundray.width;
-			var newHeight:Number = newBmpDataBoundray.height;
-			var bmpData:BitmapData = new BitmapData(_bmpDataWidth,_bmpDataHeight);
-			//bmpData.draw(_bmpData,matrix);
-			bmpData.draw(_bmpData);
-			_bmpData = bmpData;
+			var imageCenterPoint:Point = new Point(_bmpDataWidth/2,_bmpDataHeight/2);
+			rotateAroundInternalPoint(angle,imageCenterPoint);
 			sendNotification(ImageEditorFacade.IMAGE_ROTATE);
 		}
 		
 		public function cropImage(cropRect:Rectangle):void
 		{
+			_matrix.scale(1/_currentZoomValue,1/_currentZoomValue);
+			//var emptyMatrix:Matrix = new Matrix();
+			//emptyMatrix.scale();
+			//var anchor:Point = new Point(_bmpDataWidth/2,_bmpDataHeight/2);
+			//anchor = _matrix.transformPoint(anchor);
+			//zoomAroundInternalPoint(1,anchor);
+			/*var tempMatrix:Matrix = _matrix.clone();
+			var anchor:Point = new Point(_bmpDataWidth/2,_bmpDataHeight/2);
+			anchor = _matrix.transformPoint(anchor);
+			trace(_matrix);
+			tempMatrix.translate(-anchor.x,-anchor.y);
+			tempMatrix.scale(1/_matrix.a,1/_matrix.d);
+			tempMatrix.translate(anchor.x,anchor.y);
+			var noScaleMatrix:Matrix = tempMatrix;
+			_matrix = noScaleMatrix;
+			trace(_matrix);*/
+			/*var newImgBoundray:Rectangle = transformRectangle(_bmpData.rect,noScaleMatrix);
+			var tempMatrix2:Matrix = noScaleMatrix.clone();
+			tempMatrix2.translate(-newImgBoundray.x,-newImgBoundray.y);
+			var tanslateMatrix:Matrix = tempMatrix2;
+			
+			var totalMatrix:Matrix = noScaleMatrix.clone();
+			totalMatrix.concat(tanslateMatrix);
+			var tempBmpData:BitmapData = drawTempRotatedNoScaleBmpData(2800,2800,totalMatrix);
+			var newCropBoundary:Rectangle = transformRectangle(cropRect,totalMatrix);
+			
+			var newBmpData:BitmapData = new BitmapData(newCropBoundary.width,newCropBoundary.height);
+			var drawMatrix:Matrix = new Matrix();
+			drawMatrix.translate(-newCropBoundary.x,-newCropBoundary.y);
+			newBmpData.draw(tempBmpData,drawMatrix);
+
+			_bmpData = newBmpData;*/
+			/*var nonScaleMatrix:Matrix = calcNonScaleMatrix();
+			var newImgBoundray:Rectangle = transformRectangle(_bmpData.rect,_matrix);
+			
+			var tempBmpData:BitmapData = drawTempRotatedNoScaleBmpData(2800,2800,nonScaleMatrix);
+ 			var newCropBoundary:Rectangle = transformRectangle(cropRect,nonScaleMatrix);
+			var newBmpData:BitmapData = new BitmapData(newCropBoundary.width,newCropBoundary.height);
+			newBmpData.copyPixels(tempBmpData,newCropBoundary,new Point(0,0));
+			tempBmpData.dispose();
+			_bmpData = newBmpData;*/
+			/*var orginBmpDataBoundary:Rectangle = new Rectangle(0,0,_bmpDataWidth,_bmpDataHeight);
+			var newBmpDataBoundray:Rectangle = transformRectangle(orginBmpDataBoundary,matrix);
+			var newBmpData:BitmapData = new BitmapData(newBmpDataBoundray.width,newBmpDataBoundray.height);
+			newBmpData.draw(_bmpData,_matrix);
+			
 			var newBmpData:BitmapData = new BitmapData(cropRect.width,cropRect.height);
 			newBmpData.copyPixels(_bmpData,cropRect,new Point(0,0));
 			_bmpData = newBmpData;
-			_bmpDataWidth = _bmpData.width;
-			_bmpDataHeight = _bmpData.height;
-			_imageWidth = _bmpDataWidth;
-			_imageHeight = _bmpDataHeight;
-			_matrix = new Matrix();
-			initTransform();
+			*/
+			//initTransform();
 			sendNotification(ImageEditorFacade.IMAGE_CROP);
 		}
 		
@@ -334,11 +369,6 @@ package sxf.apps.imageeditor.mvc.model
 		{
 			var newBmpData:BitmapData = ImageResizer.bilinearIterative(_bmpData,width,height,ResizeMath.METHOD_PAN_AND_SCAN);
 			_bmpData = newBmpData;
-			_bmpDataWidth = _bmpData.width;
-			_bmpDataHeight = _bmpData.height;
-			_imageWidth = _bmpDataWidth;
-			_imageHeight = _bmpDataHeight;
-			_matrix = new Matrix();
 			initTransform();
 			sendNotification(ImageEditorFacade.IMAGE_RESIZE);
 			
@@ -348,19 +378,14 @@ package sxf.apps.imageeditor.mvc.model
 		{
 			var newBmpData:BitmapData = _orgBmpData.clone();
 			_bmpData = newBmpData;
-			_bmpDataWidth = _bmpData.width;
-			_bmpDataHeight = _bmpData.height;
-			_imageWidth = _bmpDataWidth;
-			_imageHeight = _bmpDataHeight;
-			_matrix = new Matrix();
 			initTransform();
 			sendNotification(ImageEditorFacade.IMAGE_RESET);
 		}
 		
 		public function dragImage(initPoint:Point,endPoint:Point):void
 		{
-			var newInitPoint:Point = new Point(initPoint.x+matrix.tx,initPoint.y+matrix.ty);
-			matrix.translate(endPoint.x - newInitPoint.x,endPoint.y - newInitPoint.y);
+			var currentInitPoint:Point = _matrix.transformPoint(initPoint);
+			matrix.translate(endPoint.x - currentInitPoint.x,endPoint.y - currentInitPoint.y);
 			sendNotification(ImageEditorFacade.IMAGE_DRAG);
 			updateRestrainRect();
 		}
@@ -368,7 +393,8 @@ package sxf.apps.imageeditor.mvc.model
 		//计算缩放关键值
 		private function calcZoomKeyValue():void
 		{
-			_fitZoomValue = calcFitZoomValue(_bmpDataWidth,_bmpDataHeight,_viewPortWidth-2*_padding,_viewPortHeight-2*_padding);
+			var bmpDataBounds:Rectangle = getBmpDataBoundary(calcNoScaleMatrix());
+			_fitZoomValue = calcFitZoomValue(bmpDataBounds.width,bmpDataBounds.height,_viewPortWidth-2*_padding,_viewPortHeight-2*_padding);
 
 			if(isImageLargerThanViewPort())//图片超出视窗范围
 			{
@@ -397,43 +423,51 @@ package sxf.apps.imageeditor.mvc.model
 			return scaleValue;
 		}
 		
-		private function calcInitZoomValue():Number
+		private function calcInitTargetZoomValue():Number
 		{
-			var targetZoomValue:Number;
-			if(isImageLargerThanViewPort())
-			{
-				targetZoomValue = _fitZoomValue;
-			}else
-			{
-				targetZoomValue = _minZoomValue;
-			}
-
+			var targetZoomValue:Number = _minZoomValue;
 			return targetZoomValue;
 		}
 		
 		private function calcTargetZoomValue():Number
 		{
 			var targetZoomValue:Number = _currentZoomValue + _zoomStep;
-			if(_currentZoomValue<_fitZoomValue && targetZoomValue>_fitZoomValue)
+			var middleZoomvalue:Number = isImageLargerThanViewPort()?1:_fitZoomValue;
+			
+			if(_currentZoomValue<middleZoomvalue)
 			{
-				targetZoomValue = _fitZoomValue;
+				if(targetZoomValue > middleZoomvalue)
+				{
+					targetZoomValue = middleZoomvalue;
+				}
+				else if(targetZoomValue < _minZoomValue)
+				{
+					targetZoomValue = _minZoomValue;
+				}
 			}
-			else if(_currentZoomValue>_fitZoomValue && targetZoomValue<_fitZoomValue)
+			else if(_currentZoomValue>middleZoomvalue)
 			{
-				targetZoomValue = _fitZoomValue;
+				if(targetZoomValue < middleZoomvalue)
+				{
+					targetZoomValue = middleZoomvalue;
+				}
+				else if(targetZoomValue > _maxZoomValue)
+				{
+					targetZoomValue = _maxZoomValue;
+				}
 			}
-			else if(_currentZoomValue<=_maxZoomValue && targetZoomValue>_maxZoomValue)
+			else if(_currentZoomValue == middleZoomvalue)
 			{
-				targetZoomValue = _maxZoomValue;
+				if(targetZoomValue < _minZoomValue)
+				{
+					targetZoomValue = _minZoomValue;
+				}
+				else if(targetZoomValue > _maxZoomValue)
+				{
+					targetZoomValue = _maxZoomValue;
+				}
 			}
-			else if(_currentZoomValue>=_minZoomValue && targetZoomValue<_minZoomValue)
-			{
-				targetZoomValue = _minZoomValue;
-			}
-			else if(_currentZoomValue<1 && targetZoomValue>1)
-			{
-				targetZoomValue = 1;
-			}
+			
 			return targetZoomValue;
 		}
 		
@@ -445,9 +479,12 @@ package sxf.apps.imageeditor.mvc.model
 			_matrix.scale(zoomValue/_currentZoomValue,zoomValue/_currentZoomValue);
 			_matrix.translate(anchor.x,anchor.y);
 			_currentZoomValue = zoomValue;
-			_imageWidth = Math.round(_bmpDataWidth * zoomValue);
-			_imageHeight = Math.round(_bmpDataHeight * zoomValue);
+			var bounds:Rectangle = getBmpDataBoundary(_matrix);
+			_imageWidth = bounds.width;
+			_imageHeight = bounds.height;
+			
 			sendNotification(ImageEditorFacade.IMAGE_ZOOM,zoomValue);
+			updateRestrainRect();
 			//checkForDrag();
 		}
 		
@@ -456,12 +493,15 @@ package sxf.apps.imageeditor.mvc.model
 		{
 			var anchor:Point = _matrix.transformPoint(point);
 			_matrix.translate(-anchor.x,-anchor.y);
-			_matrix.scale(zoomValue/_matrix.a,zoomValue/_matrix.d);
+			_matrix.scale(zoomValue/_currentZoomValue,zoomValue/_currentZoomValue);
 			_matrix.translate(anchor.x,anchor.y);
 			_currentZoomValue = zoomValue;
-			_imageWidth = Math.round(_bmpDataWidth * zoomValue);
-			_imageHeight = Math.round(_bmpDataHeight * zoomValue);
+			var bounds:Rectangle = getBmpDataBoundary(_matrix);
+			_imageWidth = bounds.width;
+			_imageHeight = bounds.height;
+			
 			sendNotification(ImageEditorFacade.IMAGE_ZOOM,zoomValue);
+			updateRestrainRect();
 			//checkForDrag();
 		}
 		
@@ -473,7 +513,13 @@ package sxf.apps.imageeditor.mvc.model
 			var anchor:Point = _matrix.transformPoint(point);
 			_matrix.translate(-anchor.x,-anchor.y);
 			_matrix.rotate(angle);
+			_currentRotateAngle = (_currentRotateAngle+angle)%360;
 			_matrix.translate(anchor.x,anchor.y);
+			var bounds:Rectangle = getBmpDataBoundary(_matrix);
+			_imageWidth = bounds.width;
+			_imageHeight = bounds.height;
+			calcZoomKeyValue();
+			updateRestrainRect();
 		}
 		
 		private function rotateAroundExternalPoint(angle:Number,point:Point):void
@@ -481,19 +527,27 @@ package sxf.apps.imageeditor.mvc.model
 			var anchor:Point = point;
 			_matrix.translate(-anchor.x,-anchor.y);
 			_matrix.rotate(angle);
+			_currentRotateAngle = (_currentRotateAngle+angle)%360;
 			_matrix.translate(anchor.x,anchor.y);
+			var bounds:Rectangle = getBmpDataBoundary(_matrix);
+			_imageWidth = bounds.width;
+			_imageHeight = bounds.height;
+			calcZoomKeyValue();
+			updateRestrainRect();
 		}
 		
 		private function initTransform():void
 		{
-			_imageWidth = bmpDataWidth;
-			_imageHeight = bmpDataHeight;
+			_matrix = new Matrix();
+			_bmpDataWidth = _bmpData.width;
+			_bmpDataHeight = _bmpData.height;
+			_imageWidth = _bmpDataWidth;
+			_imageHeight = _bmpDataHeight;
 			calcZoomKeyValue();
-			var zoomValue:Number = calcInitZoomValue();
-			var originImgCenterPoint:Point = new Point(_bmpDataWidth/2,_bmpDataHeight/2);
-			zoomAroundInternalPoint(zoomValue,originImgCenterPoint);
 			moveImageToCenter();
-			sendNotification(ImageEditorFacade.IMAGE_INIT);
+			var zoomValue:Number = calcInitTargetZoomValue();
+			var anchor:Point = new Point(_bmpDataWidth/2,_bmpDataHeight/2);
+			zoomAroundInternalPoint(zoomValue,anchor);
 		}
 		
 		private function moveImageToCenter():void
@@ -502,7 +556,6 @@ package sxf.apps.imageeditor.mvc.model
 			_matrix.translate(-parentPoint.x,-parentPoint.y);
 			_matrix.translate(_viewPortWidth/2,_viewPortHeight/2);
 			sendNotification(ImageEditorFacade.IMAGE_CENTER);
-			updateRestrainRect();
 		}
 		
 		private function checkForDrag():void
@@ -519,12 +572,12 @@ package sxf.apps.imageeditor.mvc.model
 		
 		private function isImageLargerThanViewPort():Boolean
 		{
-			return (_imageWidth>_viewPortWidth-2*_padding || _imageHeight>_viewPortHeight-2*_padding);
+			return (_bmpDataWidth>_viewPortWidth-2*_padding || _bmpDataHeight>_viewPortHeight-2*_padding);
 		}
 
 		private function updateRestrainRect():void
 		{
-			restrainRect = new Rectangle(Math.floor(matrix.tx),Math.floor(matrix.ty),imageWidth,imageHeight);
+			restrainRectangle = getBmpDataBoundary(_matrix);
 		}
 		
 		private function transformRectangle(targetRect:Rectangle,matrix:Matrix):Rectangle
@@ -537,12 +590,30 @@ package sxf.apps.imageeditor.mvc.model
 			var newPoint3:Point = matrix.transformPoint(point3);
 			var point4:Point = new Point(targetRect.x+targetRect.width,targetRect.y+targetRect.height);
 			var newPoint4:Point = matrix.transformPoint(point4);
-			var minx:Number = Math.min(newPoint1.x,newPoint2.x,newPoint3.x,newPoint4.x);
-			var maxx:Number = Math.max(newPoint1.x,newPoint2.x,newPoint3.x,newPoint4.x);
-			var miny:Number = Math.min(newPoint1.y,newPoint2.y,newPoint3.y,newPoint4.y);
-			var maxy:Number = Math.max(newPoint1.y,newPoint2.y,newPoint3.y,newPoint4.y);
+			var minx:Number = Math.round(Math.min(newPoint1.x,newPoint2.x,newPoint3.x,newPoint4.x));
+			var maxx:Number = Math.round(Math.max(newPoint1.x,newPoint2.x,newPoint3.x,newPoint4.x));
+			var miny:Number = Math.round(Math.min(newPoint1.y,newPoint2.y,newPoint3.y,newPoint4.y));
+			var maxy:Number = Math.round(Math.max(newPoint1.y,newPoint2.y,newPoint3.y,newPoint4.y));
 			return new Rectangle(minx,miny,maxx-minx,maxy-miny);
 		}
-
+		
+		private function getBmpDataBoundary(matrix:Matrix):Rectangle
+		{
+			return transformRectangle(_bmpData.rect,matrix);
+		}
+		
+		private function calcNoScaleMatrix():Matrix
+		{
+			var matrix:Matrix = new Matrix;
+			matrix.rotate(_currentRotateAngle);
+			return matrix;
+		}
+		
+		private function drawTempRotatedNoScaleBmpData(width:Number,height:Number,matrix:Matrix):BitmapData
+		{
+			var tempBmpData:BitmapData = new BitmapData(width,height);
+			tempBmpData.draw(_bmpData,matrix);
+			return tempBmpData;
+		}
 	}
 }

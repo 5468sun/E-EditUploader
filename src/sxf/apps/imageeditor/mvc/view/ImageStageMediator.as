@@ -29,12 +29,12 @@ package sxf.apps.imageeditor.mvc.view
 		
 		public function updateImageBmpData(newBmpData:BitmapData):void
 		{
-			imageStage.updateImageBmpData(newBmpData);
+			imageStage.bmpData = newBmpData;
 		}
 		
 		public function applyMatrix(matrix:Matrix):void
 		{
-			imageStage.applyMatrix(matrix);
+			imageStage.matrix = matrix;
 		}
 		
 		override public function onRegister():void
@@ -49,7 +49,7 @@ package sxf.apps.imageeditor.mvc.view
 			imageStage.removeEventListener(ImageStageEvent.DRAGE_IMAGE,onDrageImage);
 		}
 		
-		override public function listNotificationInterests():Array
+		/*override public function listNotificationInterests():Array
 		{
 			return [ImageEditorFacade.PADDING_CHANGE];
 		}
@@ -62,7 +62,7 @@ package sxf.apps.imageeditor.mvc.view
 					imageStage.padding = notification.getBody() as Number;
 					break;
 			}
-		}
+		}*/
 		
 		
 		

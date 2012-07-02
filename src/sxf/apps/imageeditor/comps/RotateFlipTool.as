@@ -92,12 +92,12 @@ package sxf.apps.imageeditor.comps
 		
 		private function onClickRotateLeftBtn(e:MouseEvent):void
 		{
-			dispatchEvent(new RotateFlipToolEvent(RotateFlipToolEvent.ROTATE_IMAGE,false,false,-Math.PI/2));
+			dispatchEvent(new RotateFlipToolEvent(RotateFlipToolEvent.ROTATE_IMAGE,false,false,-Math.PI/4));
 		}
 		
 		private function onClickRotateRightBtn(e:MouseEvent):void
 		{
-			dispatchEvent(new RotateFlipToolEvent(RotateFlipToolEvent.ROTATE_IMAGE,false,false,Math.PI/2));
+			dispatchEvent(new RotateFlipToolEvent(RotateFlipToolEvent.ROTATE_IMAGE,false,false,Math.PI/4));
 		}
 		
 		private function onClickFlipHorizontalBtn(e:MouseEvent):void

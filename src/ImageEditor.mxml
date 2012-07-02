@@ -109,7 +109,7 @@
 			<!--<comps:ImageDisplay id="imageDisplay"/>-->
 			<!--<line:AntLineRectSelector id="anlineSelector" visible="false" useCustomRestrainRect="false"/>
 			<image:Cropper id="cropSelector" visible="false" useCustomRestrainRect="true"/>-->
-			<cropselector:CropSelector id="cropSelector" width="100%" height="100%" />
+			<cropselector:CropSelector id="cropSelector" width="100%" height="100%" visible="true" />
 			
 			<comps:ImgMapper id="imgMapper" right="10" top="10" />
 		</s:SkinnableContainer>

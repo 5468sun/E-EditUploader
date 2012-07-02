@@ -36,45 +36,45 @@ package sxf.apps.imageeditor.mvc.controller
 			{
 				case ImageEditorFacade.IMAGE_INIT:
 					imageStageMediator.updateImageBmpData(imageEditorProxy.bmpData);
-					imageStageMediator.applyMatrix(imageEditorProxy.matrix);
+					imageStageMediator.applyMatrix(imageEditorProxy.matrix.clone());
 					break;
 				
 				case ImageEditorFacade.IMAGE_ZOOM:
-					imageStageMediator.applyMatrix(imageEditorProxy.matrix);
+					imageStageMediator.applyMatrix(imageEditorProxy.matrix.clone());
 					zoomToolMediator.setZoomValue(Number(notification.getBody()));
 					break;
 				
 				case ImageEditorFacade.IMAGE_FLIP:
-					imageStageMediator.updateImageBmpData(imageEditorProxy.bmpData);
-					imageStageMediator.applyMatrix(imageEditorProxy.matrix);
+					//imageStageMediator.updateImageBmpData(imageEditorProxy.bmpData);
+					imageStageMediator.applyMatrix(imageEditorProxy.matrix.clone());
 					break;
 				
 				case ImageEditorFacade.IMAGE_ROTATE:
-					imageStageMediator.updateImageBmpData(imageEditorProxy.bmpData);
-					imageStageMediator.applyMatrix(imageEditorProxy.matrix);
+					//imageStageMediator.updateImageBmpData(imageEditorProxy.bmpData);
+					imageStageMediator.applyMatrix(imageEditorProxy.matrix.clone());
 					break;
-				/*case ImageEditorFacade.IMAGE_CROP:
-					imageStageMediator.updateImageBmpData(imageEditorProxy.bmpData);
-					imageStageMediator.applyMatrix(imageEditorProxy.matrix);
-					break;*/
+				case ImageEditorFacade.IMAGE_CROP:
+					//imageStageMediator.updateImageBmpData(imageEditorProxy.bmpData);
+					imageStageMediator.applyMatrix(imageEditorProxy.matrix.clone());
+					break;
 				case ImageEditorFacade.IMAGE_RESIZE:
 					imageStageMediator.updateImageBmpData(imageEditorProxy.bmpData);
-					imageStageMediator.applyMatrix(imageEditorProxy.matrix);
+					imageStageMediator.applyMatrix(imageEditorProxy.matrix.clone());
 					break;
 				
 				case ImageEditorFacade.IMAGE_RESET:
 					imageStageMediator.updateImageBmpData(imageEditorProxy.bmpData);
-					imageStageMediator.applyMatrix(imageEditorProxy.matrix);
+					imageStageMediator.applyMatrix(imageEditorProxy.matrix.clone());
 					break;
 				
 				case ImageEditorFacade.IMAGE_DRAG:
 					
-					imageStageMediator.applyMatrix(imageEditorProxy.matrix);
+					imageStageMediator.applyMatrix(imageEditorProxy.matrix.clone());
 					break;
 				
 				case ImageEditorFacade.IMAGE_CENTER:
 					
-					imageStageMediator.applyMatrix(imageEditorProxy.matrix);
+					imageStageMediator.applyMatrix(imageEditorProxy.matrix.clone());
 					break;
 			}
 		}

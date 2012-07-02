@@ -66,7 +66,7 @@ package sxf.apps.imageeditor.mvc.view
 		private function restrainValue(value:Number,type:String):Number
 		{
 			var imageEditorProxy:ImageEditorProxy = facade.retrieveProxy(ImageEditorProxy.NAME) as ImageEditorProxy;
-			var restrainRect:Rectangle = imageEditorProxy.restrainRect;
+			var restrainRect:Rectangle = imageEditorProxy.restrainRectangle;
 			var cropRect:Rectangle = imageEditorProxy.cropRectangle;
 			var matrix:Matrix = imageEditorProxy.matrix;
 			trace("restrainRect:"+restrainRect);
