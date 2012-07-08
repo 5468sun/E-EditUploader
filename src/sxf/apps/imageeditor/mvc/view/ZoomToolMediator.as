@@ -16,11 +16,6 @@ package sxf.apps.imageeditor.mvc.view
 			super(NAME, viewComponent);
 		}
 		
-		public function setZoomValue(value:Number):void
-		{
-			zoomTool.zoomValue = value;
-		}
-		
 		override public function onRegister():void
 		{
 			zoomTool.addEventListener(ZoomToolEvent.ZOOM_IN,onZoomIn);

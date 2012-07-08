@@ -12,10 +12,8 @@
 	
 	<!-- SkinParts
 	name=_zoomOutBtn, type=spark.components.supportClasses.SkinnableComponent, required=true
-	name=_zoomValueDisplay, type=spark.components.Label, required=false
 	name=_zoomInBtn, type=spark.components.supportClasses.SkinnableComponent, required=true
 	-->
-	<s:Button id="_zoomInBtn" label="放大" />
-	<s:Button id="_zoomOutBtn" label="缩小" />
-	<s:Label id="_zoomValueDisplay" />
+	<s:Button id="_zoomInBtn" label="放大" width="45" />
+	<s:Button id="_zoomOutBtn" label="缩小" width="45" />
 </s:Skin>

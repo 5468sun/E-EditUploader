@@ -91,6 +91,16 @@ package sxf.apps.imageeditor.mvc.view
 
 		}
 		
+		public function activateCropSelector():void
+		{
+			cropSelector.activate();
+		}
+		
+		public function deActivateCropSelector():void
+		{
+			cropSelector.deActivate();
+		}
+		
 		//  事件处理函数    //////////////////////////////////////////////////////////////
 		
 		

@@ -28,15 +28,18 @@ package sxf.apps.imageeditor.mvc.controller
 				case ImageEditorFacade.CROP_RESTRAIN_CHANGE:
 					
 					cropSelectorMediator.setRestrainRect(notification.getBody() as Rectangle);
-					cropToolMediator.setRestrainRect(notification.getBody() as Rectangle);
+					break;
+				
+				case ImageEditorFacade.STEPPER_RESTRAIN_CHANGE:
+					cropToolMediator.setRestrainRectangle(notification.getBody() as Rectangle);
 					break;
 				
 				case ImageEditorFacade.CROP_RECTANGLE_CHANGE:
 					cropSelectorMediator.setSelectRect(notification.getBody() as Rectangle);
 					break;
 				
-				case ImageEditorFacade.SELECT_RECTANGLE_CHANGE:
-					cropToolMediator.setSelectRect(notification.getBody() as Rectangle);
+				case ImageEditorFacade.REAL_CROP_RECTANGLE_CHANGE:
+					cropToolMediator.setRealCropRectangle(notification.getBody() as Rectangle);
 					break;
 				
 				case ImageEditorFacade.CROP_MOUSE_LOCATION:

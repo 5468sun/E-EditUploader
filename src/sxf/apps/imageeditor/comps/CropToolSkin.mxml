@@ -18,12 +18,12 @@
 	name=_xInput, type=spark.components.NumericStepper, required=true
 	name=_wInput, type=spark.components.NumericStepper, required=true
 	-->
-	<s:NumericStepper id="_xInput" maximum="10000" minimum="0" />
-	<s:NumericStepper id="_yInput" maximum="10000" minimum="0" />
+	<s:NumericStepper id="_xInput" maximum="10000" minimum="0" width="60" />
+	<s:NumericStepper id="_yInput" maximum="10000" minimum="0" width="60" />
 	
-	<s:NumericStepper id="_wInput" maximum="10000" minimum="0" />
-	<s:NumericStepper id="_hInput" maximum="10000" minimum="0" />
+	<s:NumericStepper id="_wInput" maximum="10000" minimum="0" width="60" />
+	<s:NumericStepper id="_hInput" maximum="10000" minimum="0" width="60" />
 	
-	<s:Button id="_confirmBtn" label="确定"/>
-	<s:Button id="_cancelBtn" label="取消"/>
+	<s:Button id="_confirmBtn" label="确定" width="45" />
+	<s:Button id="_cancelBtn" label="取消" width="45" />
 </s:Skin>

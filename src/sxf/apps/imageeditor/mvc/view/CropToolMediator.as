@@ -9,6 +9,8 @@ package sxf.apps.imageeditor.mvc.view
 	import org.puremvc.as3.interfaces.INotification;
 	import org.puremvc.as3.patterns.mediator.Mediator;
 	
+	import spark.components.Button;
+	
 	import sxf.apps.imageeditor.comps.CropTool;
 	import sxf.apps.imageeditor.events.CropToolEvent;
 	import sxf.apps.imageeditor.mvc.ImageEditorFacade;
@@ -17,24 +19,37 @@ package sxf.apps.imageeditor.mvc.view
 	public class CropToolMediator extends Mediator implements IMediator
 	{
 		public static const NAME:String = "cropToolMediator";
+		private var _cropBtn:Object;
 		
-		public function CropToolMediator(viewComponent:Object=null)
+		public function CropToolMediator(viewComponent:Object=null,viewComponent2:Object=null)
 		{
 			super(NAME, viewComponent);
+			_cropBtn = viewComponent2;
 		}
 		
-		public function setSelectRect(rectangle:Rectangle):void
+		public function setRealCropRectangle(rectangle:Rectangle):void
 		{
-			cropTool.rectangle = rectangle;
+			cropTool.realCropRectangle = rectangle;
 		}
 		
-		/*public function setMouseLocaion(location:Point):void
+		public function setRestrainRectangle(rectangle:Rectangle):void
 		{
-			
+			cropTool.restrainRectangle = rectangle;
 		}
-		*/
+		
+		public function deActivateCropTool():void
+		{
+			cropTool.visible = false;
+		}
+		
+		public function activateCropTool():void
+		{
+			cropTool.visible = true;
+		}
+		
 		override public function onRegister():void
 		{
+			cropBtn.addEventListener(MouseEvent.CLICK,cropBtnClick);
 			cropTool.addEventListener(CropToolEvent.CHANGE_X,cropChangeHandler);
 			cropTool.addEventListener(CropToolEvent.CHANGE_Y,cropChangeHandler);
 			cropTool.addEventListener(CropToolEvent.CHANGE_W,cropChangeHandler);
@@ -45,6 +60,7 @@ package sxf.apps.imageeditor.mvc.view
 		
 		override public function onRemove():void
 		{
+			cropBtn.removeEventListener(MouseEvent.CLICK,cropBtnClick);
 			cropTool.removeEventListener(CropToolEvent.CHANGE_X,cropChangeHandler);
 			cropTool.removeEventListener(CropToolEvent.CHANGE_Y,cropChangeHandler);
 			cropTool.removeEventListener(CropToolEvent.CHANGE_W,cropChangeHandler);
@@ -58,9 +74,9 @@ package sxf.apps.imageeditor.mvc.view
 			return viewComponent as CropTool;
 		}
 		
-		public function setRestrainRect(restrainRect:Rectangle):void
+		private function get cropBtn():Button
 		{
-			cropTool.restrainStepper(restrainRect);
+			return _cropBtn as Button;
 		}
 		
 		private function restrainValue(value:Number,type:String):Number
@@ -69,8 +85,7 @@ package sxf.apps.imageeditor.mvc.view
 			var restrainRect:Rectangle = imageEditorProxy.restrainRectangle;
 			var cropRect:Rectangle = imageEditorProxy.cropRectangle;
 			var matrix:Matrix = imageEditorProxy.matrix;
-			trace("restrainRect:"+restrainRect);
-			trace("cropRect:"+cropRect);
+
 			switch(type)
 			{
 				case CropToolEvent.CHANGE_X:
@@ -117,70 +132,68 @@ package sxf.apps.imageeditor.mvc.view
 					}
 					break;
 			}
-			trace("value:"+value);
+
 			return value;
 		}
 		
-		override public function listNotificationInterests():Array
-		{
-			return [
-				//ImageEditorFacade.CROP_MOUSE_LOCATION
-			];
-		}
 		
-		override public function handleNotification(notification:INotification):void
+		private function switchCropTool():void
 		{
-			switch(notification.getName())
+			if(cropTool.visible)
 			{
-				/*case ImageEditorFacade.CROP_MOUSE_LOCATION:
-					var mouseLocation:Point = notification.getBody() as Point;
-					cropTool.mouseLocation = mouseLocation;
-					break;*/
+				sendNotification(ImageEditorFacade.DEACTIVATE_CROPPER);
+			}
+			else
+			{
+				sendNotification(ImageEditorFacade.ACTIVATE_CROPPER);
 			}
 		}
 		
 		// 事件监听函数      ///////////////////////////////
+		
+		private function cropBtnClick(e:MouseEvent):void
+		{
+			switchCropTool();
+		}
+		
 		private function cropChangeHandler(e:CropToolEvent):void
 		{
 			var value:Number;
 			var imageEditorProxy:ImageEditorProxy = facade.retrieveProxy(ImageEditorProxy.NAME) as ImageEditorProxy;
-			var newRect:Rectangle = imageEditorProxy.selectRectangle.clone();
+			var newRect:Rectangle = imageEditorProxy.realCropRectangle.clone();
 
 			switch(e.type)
 			{
 				case CropToolEvent.CHANGE_X:
-					value = restrainValue(e.value,CropToolEvent.CHANGE_X);
-					newRect.x = value;
+					newRect.x = e.value;
 					break;
 				
 				case CropToolEvent.CHANGE_Y:
-					value = restrainValue(e.value,CropToolEvent.CHANGE_Y);
-					newRect.y = value;
+					newRect.y = e.value;
 					break;
 				
 				case CropToolEvent.CHANGE_W:
-					value = restrainValue(e.value,CropToolEvent.CHANGE_W);
-					newRect.width = value;
+					newRect.width = e.value;
 					break;
 				
 				case CropToolEvent.CHANGE_H:
-					value = restrainValue(e.value,CropToolEvent.CHANGE_H);
-					newRect.height = value;
+					newRect.height = e.value;
 					break;
 			}
-			imageEditorProxy.setSelectRectangle(newRect);
+			imageEditorProxy.setRealCropRectangle(newRect);
 			
 		}
 		
 		private function cropConfirmHandler(e:CropToolEvent):void
 		{
 			var imageEditorProxy:ImageEditorProxy = facade.retrieveProxy(ImageEditorProxy.NAME) as ImageEditorProxy;
-			imageEditorProxy.cropImage(imageEditorProxy.selectRectangle);
+			imageEditorProxy.cropImage();
 		}
 		
 		private function cropCancelHandler(e:CropToolEvent):void
 		{
-			//do nothing
+			cropTool.visible = false;
+			sendNotification(ImageEditorFacade.DEACTIVATE_CROPPER);
 		}
 	}
 }

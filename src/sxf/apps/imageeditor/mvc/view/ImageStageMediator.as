@@ -46,6 +46,7 @@ package sxf.apps.imageeditor.mvc.view
 		
 		override public function onRemove():void
 		{
+			imageStage.removeEventListener(ResizeEvent.RESIZE,onResize);
 			imageStage.removeEventListener(ImageStageEvent.DRAGE_IMAGE,onDrageImage);
 		}
 		

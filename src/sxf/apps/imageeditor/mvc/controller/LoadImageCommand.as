@@ -92,7 +92,6 @@ package sxf.apps.imageeditor.mvc.controller
 		{
 			var imageObject:ImageObject = notification.getBody() as ImageObject;
 			storeImageObject(imageObject);
-			initImageDisplay();
 		}
 		
 		private function storeImageObject(imgObject:ImageObject):void
@@ -100,14 +99,8 @@ package sxf.apps.imageeditor.mvc.controller
 			imageEditorProxy.imageName = imgObject.name;
 			imageEditorProxy.imageType = imgObject.type;
 			imageEditorProxy.orgBmpData = imgObject.bmpData;
-			imageEditorProxy.bmpData = imgObject.bmpData.clone();
+			imageEditorProxy.initImage(imgObject.bmpData.clone());
 		}
-		
-		private function initImageDisplay():void
-		{
-			imageEditorProxy.initImage();
-		}
-		
 		
 	}
 }

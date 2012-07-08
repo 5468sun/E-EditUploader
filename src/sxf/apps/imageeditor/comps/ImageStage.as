@@ -1,49 +1,57 @@
 package sxf.apps.imageeditor.comps
 {
-	import flash.display.Bitmap;
 	import flash.display.BitmapData;
-	import flash.display.Shape;
-	import flash.display.Sprite;
+	import flash.display.DisplayObject;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.geom.Matrix;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
+	import flash.ui.Mouse;
+	import flash.ui.MouseCursor;
 	
 	import mx.core.BitmapAsset;
 	import mx.core.UIComponent;
 	
 	import spark.components.Group;
 	import spark.components.Image;
+	import spark.components.supportClasses.SkinnableComponent;
+	import spark.primitives.Rect;
 	
 	import sxf.apps.imageeditor.events.ImageStageEvent;
 	
-	public class ImageStage extends Group
+	public class ImageStage extends SkinnableComponent
 	{
 
-		private var _image:Image;
+		//private var _image:Image;
 		private var _matrix:Matrix;
 		private var _matrixChanged:Boolean = false;
 		private var _bmpData:BitmapData;
-		private var _bmpDataChange:Boolean = false;
-		private var _fillingRect:UIComponent;
-		//private var _padding:Number;
+		private var _bmpDataChanged:Boolean = false;
+		//private var _fillingRect:UIComponent;
 		private var _edge:Number = 50;
-		private var _orgImgBounds:Rectangle;
+		private var _orgImgBounds:Rectangle;//origin image boundary when image dragged.
 		private var _currentImgBounds:Rectangle;
 		private var _currentImgBoundsChanged:Boolean = false;
-		private var _imgBoundsWidth:Number;
-		private var _imgBoundsHeight:Number;
 		private var _mouseDownPoint:Point;
 		private var _initPoint:Point;
 		private var _endPoint:Point;
 		
+		
+		[SkinPart(required="false")]
+		public var _background:Rect;
+		
+		[SkinPart(required="true")]
+		public var _fillingRect:Group;
+		
+		[SkinPart(required="true")]
+		public var _image:Image;
+		
+		
+		
 		public function ImageStage()
 		{
 			super();
-			this.clipAndEnableScrolling = true;
-			//padding = 10;
-			_matrix = new Matrix;
 		}
 		
 		public function get bmpData():BitmapData
@@ -54,8 +62,8 @@ package sxf.apps.imageeditor.comps
 		public function set bmpData(value:BitmapData):void
 		{
 			_bmpData = value;
-			_bmpDataChange = true;
-			invalidateDisplayList();
+			_bmpDataChanged = true;
+			invalidateProperties();
 		}
 
 		public function get matrix():Matrix
@@ -65,12 +73,12 @@ package sxf.apps.imageeditor.comps
 
 		public function set matrix(value:Matrix):void
 		{
+			
 			if(!isMatrixTheSame(value,_matrix))
 			{
 				_matrix = value;
 				_matrixChanged = true;
 				invalidateProperties();
-				invalidateDisplayList();
 			}
 			
 		}
@@ -86,33 +94,61 @@ package sxf.apps.imageeditor.comps
 			_currentImgBoundsChanged = true;
 			invalidateDisplayList();
 		}
-
-		/*public function get padding():Number
+		
+		override protected function partAdded(partName:String, instance:Object):void
 		{
-			return _padding;
+			switch(instance)
+			{
+
+				
+				case _fillingRect:
+					initCursorSys();
+					break;
+				
+				case _image:
+					initImageDrag();
+					break;
+				
+				case _background:
+					//do nothing
+					break;
+			}
 		}
 		
-		public function set padding(value:Number):void
+		override protected function partRemoved(partName:String, instance:Object):void
 		{
-			_padding = value;
-		}*/
+			switch(instance)
+			{
+
+				case _fillingRect:
+					destroyCursorSys();
+					break;
+				
+				case _image:
+					destroyImageDrag();
+					break;
+				
+				case _background:
+					//do nothing
+					break;
+			}
+		}
 		
-		
-		override protected function createChildren():void
+		/*override protected function createChildren():void
 		{
 			super.createChildren();
 			_fillingRect = new UIComponent();
 			addElement(_fillingRect);
 			_image = new Image();
 			addElement(_image);
-			initImageDrag();
-		}
+			
+		}*/
 		
 		override protected function commitProperties():void
 		{
 			super.commitProperties();
 			
-			if(_matrixChanged)
+			if(_matrixChanged || _bmpDataChanged)
 			{
 				currentImgBounds = getBmpDataBoundary(_matrix);
 			}
@@ -133,20 +169,26 @@ package sxf.apps.imageeditor.comps
 				drawFillingRect();
 				_currentImgBoundsChanged = false;
 			}
-			if(_bmpDataChange)
+			if(_bmpDataChanged)
 			{
 				setImageBmpData();
-				_bmpDataChange = false;
+				_bmpDataChanged = false;
 			}
 		}
 		
 		private function drawFillingRect():void
 		{
-			_fillingRect.graphics.clear();
-			_fillingRect.graphics.beginFill(0xffff00);
+			/*_fillingRect.graphics.clear();
+			_fillingRect.graphics.beginFill(0xffffff,0.1);
 			_fillingRect.graphics.drawRect(_currentImgBounds.x,_currentImgBounds.y,_currentImgBounds.width,_currentImgBounds.height);
-			_fillingRect.graphics.endFill();
+			_fillingRect.graphics.endFill();*/
+			_fillingRect.x = _currentImgBounds.x;
+			_fillingRect.y = _currentImgBounds.y;
+			_fillingRect.width = _currentImgBounds.width;
+			_fillingRect.height = _currentImgBounds.height;
 		}
+		
+		
 		private function setImageBmpData():void
 		{
 			var bmp:BitmapAsset = new BitmapAsset(_bmpData);
@@ -164,14 +206,36 @@ package sxf.apps.imageeditor.comps
 			removeEventListener(MouseEvent.MOUSE_DOWN,onImageMouseDown);
 		}
 		
+		private function initCursorSys():void
+		{
+			/*addEventListener(Event.ENTER_FRAME,onCursorRelEnterFrame);
+			addEventListener(MouseEvent.ROLL_OVER,onStageMouseRollOver);
+			addEventListener(MouseEvent.ROLL_OUT,onStageMouseRollOut);*/
+			
+			//addEventListener(MouseEvent.MOUSE_MOVE,onStageMouseMove);
+			//addEventListener(MouseEvent.MOUSE_OVER,onStageMouseOver);
+			//addEventListener(MouseEvent.MOUSE_OUT,onStageMouseOut);
+			
+			_fillingRect.addEventListener(MouseEvent.ROLL_OVER,onImageMouseRollOver);
+			_fillingRect.addEventListener(MouseEvent.ROLL_OUT,onImageMouseRollOut);
+		}
+		
+		
+		
+		private function destroyCursorSys():void
+		{
+			_fillingRect.removeEventListener(MouseEvent.ROLL_OVER,onImageMouseRollOver);
+			_fillingRect.removeEventListener(MouseEvent.ROLL_OUT,onImageMouseRollOut);
+		}
+		
 		
 		private function restrainMousePoint(mousePoint:Point):Point
 		{
 			var x:Number;
 			var y:Number;
-			
+
 			var boundslocalPoint:Point = new Point(_mouseDownPoint.x-_orgImgBounds.x,_mouseDownPoint.y-_orgImgBounds.y);
-			
+
 			if(mousePoint.x < -(_orgImgBounds.width - _edge) + boundslocalPoint.x)
 			{
 				x = -(_orgImgBounds.width - _edge) + boundslocalPoint.x;
@@ -233,24 +297,109 @@ package sxf.apps.imageeditor.comps
 		
 		private function isMatrixTheSame(m1:Matrix,m2:Matrix):Boolean
 		{
-			return (m1.a == m2.a && m1.b == m2.b && m1.c == m2.c && m1.d == m2.d && m1.tx == m2.tx && m1.ty == m2.ty);
+			if(m1 == null || m2 == null)
+			{
+				return false;
+			}
+			else
+			{
+				return (m1.a == m2.a && m1.b == m2.b && m1.c == m2.c && m1.d == m2.d && m1.tx == m2.tx && m1.ty == m2.ty);
+			}
+			
 		}
 		
 		// 事件处理函数
+		
+		private function onImageMouseRollOver(e:MouseEvent):void
+		{
+			Mouse.cursor = MouseCursor.HAND;
+			trace("Mouse.cursor = MouseCursor.HAND");
+		}
+		
+		private function onImageMouseRollOut(e:MouseEvent):void
+		{
+			Mouse.cursor = MouseCursor.ARROW;
+			trace("Mouse.cursor = MouseCursor.ARROW");
+		}
+		
+		/*private function onStageMouseRollOver(e:MouseEvent):void
+		{
+			trace("onStageMouseRollOver");
+			addEventListener(Event.ENTER_FRAME,onCursorRelEnterFrame);
+		}
+		
+		private function onStageMouseRollOut(e:MouseEvent):void
+		{
+			trace("onStageMouseRollOut");
+			Mouse.cursor = MouseCursor.ARROW;
+			trace("Mouse.cursor = MouseCursor.ARROW;");
+			removeEventListener(Event.ENTER_FRAME,onCursorRelEnterFrame);
+			
+			//trace("Mouse.cursor = MouseCursor.ARROW;");
+			//Mouse.cursor = MouseCursor.ARROW;
+		}*/
+		
+		/*private function onStageMouseOver(e:MouseEvent):void
+		{
+			trace("onStageMouseOver");
+			addEventListener(Event.ENTER_FRAME,onCursorRelEnterFrame);
+		}
+		
+		private function onStageMouseOut(e:MouseEvent):void
+		{
+			trace("onStageMouseOut");
+			removeEventListener(Event.ENTER_FRAME,onCursorRelEnterFrame);
+			trace("Mouse.cursor = MouseCursor.ARROW;");
+		}*/
+		
+		/*private function onStageMouseMove(e:MouseEvent):void
+		{
+			trace("onStageMouseMove");
+			var mousePoint:Point = new Point(this.mouseX,this.mouseY);
+			if(_currentImgBounds.containsPoint(mousePoint))
+			{
+				trace("Mouse.cursor = MouseCursor.HAND;");
+				Mouse.cursor = MouseCursor.HAND;
+			}
+			else
+			{
+				trace("Mouse.cursor = MouseCursor.ARROW;");
+				Mouse.cursor = MouseCursor.ARROW;
+			}
+		}*/
+		
+		/*private function onCursorRelEnterFrame(e:Event):void
+		{
+			var mousePoint:Point = new Point(this.mouseX,this.mouseY);
+			if(_currentImgBounds.containsPoint(mousePoint))
+			{
+				trace("Mouse.cursor = MouseCursor.HAND;");
+				Mouse.cursor = MouseCursor.HAND;
+			}
+			else
+			{
+				trace("Mouse.cursor = MouseCursor.ARROW;");
+				Mouse.cursor = MouseCursor.ARROW;
+			}
+		}*/
+		
 		private function onImageMouseDown(e:MouseEvent):void
 		{	
 			_orgImgBounds = getBmpDataBoundary(_matrix);
 			_mouseDownPoint = new Point(this.mouseX,this.mouseY);
 			_initPoint = parentPointToImageLocalPoint(_mouseDownPoint);
-	
-			addEventListener(MouseEvent.MOUSE_MOVE,onImageMouseDownMove);
-			addEventListener(MouseEvent.MOUSE_UP,onImageMouseUp);
-			stage.addEventListener(MouseEvent.MOUSE_UP,onStageMouseUp);
+			
+			if(_orgImgBounds.containsPoint(_mouseDownPoint))
+			{
+				addEventListener(MouseEvent.MOUSE_MOVE,onImageMouseDownMove);
+				addEventListener(MouseEvent.MOUSE_UP,onImageMouseUp);
+				stage.addEventListener(MouseEvent.MOUSE_UP,onStageMouseUp);
+			}
 		}
 		
 		private function onImageMouseUp(e:MouseEvent):void
 		{
-			removeEventListener(Event.ENTER_FRAME,onEnterFrame);
+			removeEventListener(Event.ENTER_FRAME,onDragRelEnterFrame);
 			removeEventListener(MouseEvent.MOUSE_MOVE,onImageMouseDownMove);
 			removeEventListener(MouseEvent.MOUSE_UP,onImageMouseUp);
 		}
@@ -263,14 +412,15 @@ package sxf.apps.imageeditor.comps
 		private function onImageMouseDownMove(e:MouseEvent):void
 		{
 			
-			addEventListener(Event.ENTER_FRAME,onEnterFrame);
+			addEventListener(Event.ENTER_FRAME,onDragRelEnterFrame);
 			removeEventListener(MouseEvent.MOUSE_MOVE,onImageMouseDownMove);
 		}
 		
-		private function onEnterFrame(e:Event):void
+		private function onDragRelEnterFrame(e:Event):void
 		{
 			var mousePoint:Point = new Point(this.mouseX,this.mouseY);
 			_endPoint = restrainMousePoint(mousePoint);
+			trace(_endPoint);
 			dispatchEvent(new ImageStageEvent(ImageStageEvent.DRAGE_IMAGE,false,false,_initPoint,_endPoint));
 		}
 	}

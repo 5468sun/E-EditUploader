@@ -15,6 +15,7 @@
 			
 			import sxf.apps.imageeditor.events.ImageEditorEvent;
 			import sxf.apps.imageeditor.mvc.ImageEditorFacade;
+			import sxf.apps.imageeditor.mvc.controller.CropActivateCommand;
 			import sxf.apps.imageeditor.mvc.controller.CropSelectCommand;
 			import sxf.apps.imageeditor.mvc.controller.EditImageCommand;
 			import sxf.apps.imageeditor.mvc.controller.LoadImageCommand;
@@ -25,13 +26,15 @@
 			import sxf.apps.imageeditor.mvc.view.CropToolMediator;
 			import sxf.apps.imageeditor.mvc.view.CropperMediator;
 			import sxf.apps.imageeditor.mvc.view.EditorToolsMediator;
+			import sxf.apps.imageeditor.mvc.view.FlipToolMediator;
 			import sxf.apps.imageeditor.mvc.view.ImageDisplayMediator;
 			import sxf.apps.imageeditor.mvc.view.ImageEditorMediator;
 			import sxf.apps.imageeditor.mvc.view.ImageStageMediator;
 			import sxf.apps.imageeditor.mvc.view.ImgMapperMediator;
-			import sxf.apps.imageeditor.mvc.view.RotateFlipToolMediator;
+			import sxf.apps.imageeditor.mvc.view.RotateToolMediator;
 			import sxf.apps.imageeditor.mvc.view.TopInfoMediator;
 			import sxf.apps.imageeditor.mvc.view.ZoomToolMediator;
+			
 			
 			protected function imageEditor_creationCompleteHandler(event:FlexEvent):void
 			{
@@ -52,10 +55,12 @@
 				//facade.registerMediator(new TopInfoMediator(topInfo));
 				//facade.registerMediator(new ImageDisplayMediator(imageDisplay));
 				facade.registerMediator(new CropSelectorMediator(cropSelector));
-				facade.registerMediator(new CropToolMediator(cropTool));
-				facade.registerMediator(new RotateFlipToolMediator(rotateFlipTool));
+				facade.registerMediator(new CropToolMediator(cropTool,cropBtn));
+				facade.registerMediator(new FlipToolMediator(flipTool));
 				facade.registerMediator(new ZoomToolMediator(zoomTool));
+				facade.registerMediator(new RotateToolMediator(rotateTool));
 				facade.registerMediator(new ImageStageMediator(imageStage));
+				facade.registerMediator(new TopInfoMediator(topInfo));
 				//facade.registerMediator(new EditorToolsMediator(editorTool));
 				//facade.registerMediator(new ImgMapperMediator(imgMapper));
 				//facade.registerMediator(new CropperMediator(cropSelector));
@@ -78,11 +83,14 @@
 				facade.registerCommand(ImageEditorFacade.IMAGE_RESIZE,EditImageCommand);
 				facade.registerCommand(ImageEditorFacade.IMAGE_RESET,EditImageCommand);
 				facade.registerCommand(ImageEditorFacade.IMAGE_DRAG,EditImageCommand);
-				facade.registerCommand(ImageEditorFacade.IMAGE_CENTER,EditImageCommand);
 				
 				facade.registerCommand(ImageEditorFacade.CROP_RECTANGLE_CHANGE,CropSelectCommand);
-				facade.registerCommand(ImageEditorFacade.SELECT_RECTANGLE_CHANGE,CropSelectCommand);
+				facade.registerCommand(ImageEditorFacade.REAL_CROP_RECTANGLE_CHANGE,CropSelectCommand);
 				facade.registerCommand(ImageEditorFacade.CROP_RESTRAIN_CHANGE,CropSelectCommand);
+				facade.registerCommand(ImageEditorFacade.STEPPER_RESTRAIN_CHANGE,CropSelectCommand);
+				
+				facade.registerCommand(ImageEditorFacade.DEACTIVATE_CROPPER,CropActivateCommand);
+				facade.registerCommand(ImageEditorFacade.ACTIVATE_CROPPER,CropActivateCommand);
 				//facade.registerCommand(ImageEditorFacade.CROP_MOUSE_LOCATION,CropSelectCommand);
 				
 				
@@ -105,18 +113,22 @@
 			<s:VerticalLayout paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10"/>
 		</s:layout>
 		<s:SkinnableContainer id="editArea" width="100%" height="100%" backgroundColor="0xcccccc">
-			<comps:ImageStage id="imageStage" width="100%" height="100%" />
+			<comps:ImageStage id="imageStage" width="100%" height="100%" skinClass="sxf.apps.imageeditor.comps.ImageStageSkin" />
 			<!--<comps:ImageDisplay id="imageDisplay"/>-->
 			<!--<line:AntLineRectSelector id="anlineSelector" visible="false" useCustomRestrainRect="false"/>
 			<image:Cropper id="cropSelector" visible="false" useCustomRestrainRect="true"/>-->
-			<cropselector:CropSelector id="cropSelector" width="100%" height="100%" visible="true" />
+			<cropselector:CropSelector id="cropSelector" width="100%" height="100%" visible="false" />
 			
 			<comps:ImgMapper id="imgMapper" right="10" top="10" />
+			<comps:ZoomTool right="0" bottom="0" id="zoomTool" skinClass="sxf.apps.imageeditor.comps.ZoomToolSkin" />
 		</s:SkinnableContainer>
 		
 	</s:BorderContainer>
 	<!--<comps:EditorTools id="editorTool"/>-->
-	<comps:CropTool id="cropTool" skinClass="sxf.apps.imageeditor.comps.CropToolSkin" />
-	<comps:RotateFlipTool id="rotateFlipTool" skinClass="sxf.apps.imageeditor.comps.RotateFlipToolSkin" />
-	<comps:ZoomTool id="zoomTool" skinClass="sxf.apps.imageeditor.comps.ZoomToolSkin" />
+	<s:HGroup>
+		<s:Button id="cropBtn" label="裁切" width="45" />
+		<comps:FlipTool id="flipTool" skinClass="sxf.apps.imageeditor.comps.FlipToolSkin" />
+		<comps:RotateTool id="rotateTool" skinClass="sxf.apps.imageeditor.comps.RotateToolSkin" />
+	</s:HGroup>
+	<comps:CropTool id="cropTool" skinClass="sxf.apps.imageeditor.comps.CropToolSkin" visible="false" />
 </s:Application>

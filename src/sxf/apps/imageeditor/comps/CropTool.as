@@ -7,13 +7,18 @@ package sxf.apps.imageeditor.comps
 	
 	import spark.components.NumericStepper;
 	import spark.components.supportClasses.SkinnableComponent;
+	import spark.effects.Fade;
 	
 	import sxf.apps.imageeditor.events.CropToolEvent;
 	
 	public class CropTool extends SkinnableComponent
 	{
-		private var _rectangle:Rectangle = new Rectangle();
+		//private var _cropRectangle:Rectangle = new Rectangle();
+		private var _restrainRectangle:Rectangle = new Rectangle();
+		private var _realCropRectangle:Rectangle = new Rectangle();
 		private var _mouseLocation:Point;
+		
+		
 
 		[SkinPart(required="true")]
 		public var _xInput:NumericStepper;
@@ -37,17 +42,56 @@ package sxf.apps.imageeditor.comps
 		{
 			super();
 			_mouseLocation = new Point(-1,-1);
+			var fadeInEffect:Fade = new Fade(this);
+			var fadeOutEffect:Fade = new Fade(this);
+			fadeInEffect.alphaFrom = 0;
+			fadeInEffect.alphaTo = 1;
+			fadeInEffect.duration = 200;
+			fadeOutEffect.alphaFrom = 0;
+			fadeOutEffect.alphaTo = 1;
+			fadeOutEffect.duration = 200;
 		}
-		public function get rectangle():Rectangle
+
+		/*public function get cropRectangle():Rectangle
 		{
-			return _rectangle;
+			return _cropRectangle;
+		}
+
+		public function set scropRectangle(value:Rectangle):void
+		{
+			if(!value.equals(_cropRectangle))
+			{
+				_cropRectangle = value;
+				invalidateDisplayList();
+			}
+		}*/
+
+		public function get restrainRectangle():Rectangle
+		{
+			return _restrainRectangle;
+		}
+
+		public function set restrainRectangle(value:Rectangle):void
+		{
+			if(!value.equals(_restrainRectangle))
+			{
+				_restrainRectangle = value;
+				invalidateProperties();
+				invalidateDisplayList();
+			}
+		}
+
+		public function get realCropRectangle():Rectangle
+		{
+			return _realCropRectangle;
 		}
 		
-		public function set rectangle(value:Rectangle):void
+		public function set realCropRectangle(value:Rectangle):void
 		{
-			if(!value.equals(_rectangle))
+			if(!value.equals(_realCropRectangle))
 			{
-				_rectangle = value;
+				_realCropRectangle = value;
+				invalidateProperties();
 				invalidateDisplayList();
 			}
 			
@@ -67,17 +111,21 @@ package sxf.apps.imageeditor.comps
 			}
 		}
 		
-		public function restrainStepper(restrainRect:Rectangle):void
+		public function restrainStepper():void
 		{
-			/*trace(restrainRect);
-			_xInput.minimum = restrainRect.x ;
-			_xInput.maximum = restrainRect.width - rectangle.width;
-			_yInput.minimum = restrainRect.y ;
-			_yInput.maximum = restrainRect.width - rectangle.y;
+			trace("realCropRectangle"+realCropRectangle);
+			_xInput.minimum = 0 ;
+			_xInput.maximum = restrainRectangle.width - realCropRectangle.width;
+			trace("_xInput.maximum"+_xInput.maximum);
+			_yInput.minimum = 0 ;
+			_yInput.maximum = restrainRectangle.height - realCropRectangle.height;
+			trace("_yInput.maximum"+_yInput.maximum);
 			_wInput.minimum = 0;
-			_wInput.maximum = restrainRect.width - rectangle.x;
-			_wInput.minimum = 0;
-			_wInput.maximum = restrainRect.height - rectangle.y;*/
+			_wInput.maximum = restrainRectangle.width - realCropRectangle.x;
+			trace("_wInput.maximum"+_wInput.maximum);
+			_hInput.minimum = 0;
+			_hInput.maximum = restrainRectangle.height - realCropRectangle.y;
+			trace("_hInput.maximum"+_hInput.maximum);
 		}
 		
 		override protected function partAdded(partName:String, instance:Object):void
@@ -129,16 +177,34 @@ package sxf.apps.imageeditor.comps
 				case _hInput:
 					_hInput.removeEventListener(Event.CHANGE,onCropValueChange);
 					break;
+				
+				case _confirmBtn:
+					instance.removeEventListener(MouseEvent.CLICK,onCropConfirm);
+					break;
+				
+				case _cancelBtn:
+					instance.removeEventListener(MouseEvent.CLICK,onCropCancel);
+					break;
 			}
+		}
+		
+		override protected function commitProperties():void
+		{
+			super.commitProperties();
+			restrainStepper();
 		}
 		
 		override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
 		{
+			super.updateDisplayList(unscaledWidth,unscaledHeight);
 			
-			_wInput.value = rectangle.width;
-			_hInput.value = rectangle.height;
-
-			if(mouseLocation.x<0 || mouseLocation.y<0)
+			_wInput.value = realCropRectangle.width;
+			_hInput.value = realCropRectangle.height;
+			_xInput.value = realCropRectangle.x;
+			_yInput.value = realCropRectangle.y;
+			
+			
+			/*if(mouseLocation.x<0 || mouseLocation.y<0)
 			{
 				_xInput.value = rectangle.x;
 				_yInput.value = rectangle.y;
@@ -148,9 +214,9 @@ package sxf.apps.imageeditor.comps
 				
 				_xInput.value = mouseLocation.x;
 				_yInput.value = mouseLocation.y;
-			}
+			}*/
 			
-			super.updateDisplayList(unscaledWidth,unscaledHeight);
+			
 		}
 		
 		//   事件监听函数   ///////////////////////////////////////////////////////////////
@@ -158,7 +224,6 @@ package sxf.apps.imageeditor.comps
 		private function onCropValueChange(e:Event):void
 		{
 			var value:Number = NumericStepper(e.currentTarget).value;
-
 			switch(e.currentTarget)
 			{
 				case _xInput:

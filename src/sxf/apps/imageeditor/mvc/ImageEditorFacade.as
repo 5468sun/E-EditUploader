@@ -76,18 +76,21 @@ package sxf.apps.imageeditor.mvc
 		public static const IMAGE_RESIZE:String = "imageResize";
 		public static const IMAGE_RESET:String = "imageReset";
 		public static const IMAGE_DRAG:String = "imageDraged";
-		public static const IMAGE_CENTER:String = "imageCentered";
+		//public static const IMAGE_CENTER:String = "imageCentered";
 		
 		public static const CROP_RESTRAIN_CHANGE:String = "cropRestrainChange";
+		public static const STEPPER_RESTRAIN_CHANGE:String = "stepperRestrainChange";
 		public static const CROP_RECTANGLE_CHANGE:String = "cropRectangleChange";
+		public static const REAL_CROP_RECTANGLE_CHANGE:String = "realCropRectangleChange";
 		public static const CROP_MOUSE_LOCATION:String = "cropMouseLocation";
-		public static const SELECT_RECTANGLE_CHANGE:String = "selectRectangleChange";
 		
 		public static const ROTATE_IMAGE:String = "rotateImage";
 		public static const FLIP_IMAGE_HORIZONTAL:String = "flipImageHorizontal";
 		public static const FLIP_IMAGE_VERICAL:String = "flipImageVertical";
-		public static const ROTATE_FLIP_CANCEL:String = "rotateFlipCancel";
+		//public static const ROTATE_FLIP_CANCEL:String = "rotateFlipCancel";
 		
+		public static const ACTIVATE_CROPPER:String = "activateCropper";
+		public static const DEACTIVATE_CROPPER:String = "deActivateCropper";
 		public function ImageEditorFacade()
 		{
 			super();

@@ -22,21 +22,24 @@ package sxf.apps.imageeditor.mvc.view
 			super(NAME, viewComponent);
 		}
 		
-		override public function handleNotification(notification:INotification):void
+		public function setName(value:String):void
 		{
-			switch (notification.getName())
-			{
-				case ImageEditorFacade.LOAD_IMAGE_FINISH:	
-					var imageObject:ImageObject = ImageObject(notification.getBody());
-					topInfo.updateName(imageObject.name);
-					topInfo.updateType(imageObject.type);
-					topInfo.updateSize(imageObject.width +" X "+imageObject.height);
-					break;
-				
-				/*case ImageEditorFacade.CROP_IMAGE:
-					showFileSize(notification.getBody() as ImageObject);
-					break;*/
-			}
+			topInfo.updateName(value);
+		}
+		
+		public function setType(value:String):void
+		{
+			topInfo.updateType(value);
+		}
+		
+		public function setSize(value:String):void
+		{
+			topInfo.updateSize(value);
+		}
+		
+		public function setZoom(value:Number):void
+		{
+			topInfo.updateZoom(value);
 		}
 		
 		protected function get topInfo():TopInfo

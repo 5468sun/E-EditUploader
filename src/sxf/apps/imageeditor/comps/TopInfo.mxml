@@ -1,11 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+<s:HGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
 		 xmlns:s="library://ns.adobe.com/flex/spark" 
 		 xmlns:mx="library://ns.adobe.com/flex/mx" 
 		 name="topInfo" width="100%" height="100%">
-	<s:layout>
-		<s:HorizontalLayout/>
-	</s:layout>
+	<fx:Style>
+		@namespace s "library://ns.adobe.com/flex/spark";
+		@namespace mx "library://ns.adobe.com/flex/mx";
+		.topInfoName{
+			paddingTop:8px;
+			fontFamily:"微软雅黑","黑体";
+		}
+		.topInfoValue{
+			paddingTop:8px;
+			paddingRight:25px;
+			fontFamily:"微软雅黑","黑体";
+		}
+	</fx:Style>
 	<fx:Declarations>
 		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
 	</fx:Declarations>
@@ -25,12 +35,21 @@
 			{
 				fielSize.text = value;
 			}
+			
+			public function updateZoom(value:Number):void
+			{
+				fielZoom.text = Math.round(value*100) + "%";
+				//fielZoom.text = String(value);
+			}
 		]]>
 	</fx:Script>
-	<s:Label text="文件名"/>
-	<s:Label id="fileName"/>
-	<s:Label text="类型"/>
-	<s:Label id="fileType"/>
-	<s:Label text="尺寸"/>
-	<s:Label id="fielSize"/>
-</s:Group>
+	
+	<s:Label styleName="topInfoName" text="文件名:"/>
+	<s:Label styleName="topInfoValue" id="fileName"/>
+	<s:Label styleName="topInfoName" text="类型:"/>
+	<s:Label styleName="topInfoValue" id="fileType"/>
+	<s:Label styleName="topInfoName" text="尺寸:"/>
+	<s:Label styleName="topInfoValue" id="fielSize"/>
+	<s:Label styleName="topInfoName" text="缩放:"/>
+	<s:Label styleName="topInfoValue" id="fielZoom"/>
+</s:HGroup>

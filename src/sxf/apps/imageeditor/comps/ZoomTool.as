@@ -16,29 +16,12 @@ package sxf.apps.imageeditor.comps
 		[SkinPart(required="true")]
 		public var _zoomOutBtn:SkinnableComponent;
 		
-		[SkinPart(required="false")]
-		public var _zoomValueDisplay:Label;
 		
 		private var _zoomValue:Number;
 		
 		public function ZoomTool()
 		{
 			super();
-		}
-		
-		public function get zoomValue():Number
-		{
-			return _zoomValue;
-		}
-		
-		public function set zoomValue(value:Number):void
-		{
-			if(value != _zoomValue)
-			{
-				_zoomValue = value;
-				invalidateDisplayList();
-			}
-			
 		}
 		
 		override protected function partAdded(partName:String, instance:Object):void
@@ -51,10 +34,6 @@ package sxf.apps.imageeditor.comps
 				
 				case _zoomOutBtn:
 					_zoomOutBtn.addEventListener(MouseEvent.CLICK,onZoomOut);
-					break;
-				
-				case _zoomValueDisplay:
-					// do nothing
 					break;
 			}
 		}
@@ -71,15 +50,11 @@ package sxf.apps.imageeditor.comps
 					_zoomOutBtn.removeEventListener(MouseEvent.CLICK,onZoomOut);
 					break;
 				
-				case _zoomValueDisplay:
-					// do nothing
-					break;
 			}
 		}
 		
 		override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
 		{
-			_zoomValueDisplay.text = Math.round(zoomValue*100) + "%";
 			super.updateDisplayList(unscaledWidth,unscaledHeight);
 		}
 		
