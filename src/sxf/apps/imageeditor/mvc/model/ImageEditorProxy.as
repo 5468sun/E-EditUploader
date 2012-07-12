@@ -12,7 +12,7 @@ package sxf.apps.imageeditor.mvc.model
 	import sxf.apps.imageeditor.mvc.ImageEditorFacade;
 	import sxf.utils.image.ImageFlipper;
 	import sxf.utils.image.ImageResizer;
-	import sxf.utils.image.ResizeMath;
+	import sxf.utils.image.ImageResizeMath;
 	
 	public class ImageEditorProxy extends Proxy
 	{
@@ -188,6 +188,7 @@ package sxf.apps.imageeditor.mvc.model
 		{
 			_matrix = value;
 			bmpDataBoundary = getBmpDataBoundary(matrix);
+			realCropRectangle = convertCropToRealCrop(cropRectangle);
 			imageWidth = bmpDataBoundary.width;
 			imageHeight = bmpDataBoundary.height;
 			calcZoomKeyValue();
@@ -246,8 +247,6 @@ package sxf.apps.imageeditor.mvc.model
 			_bmpDataBoundary = value;
 			bmpDataNoScaleBoundary = new Rectangle(bmpDataBoundary.x,bmpDataBoundary.y,Math.round(bmpDataBoundary.width/_currentZoomValue),Math.round(bmpDataBoundary.height/_currentZoomValue));
 			updateRestrainRect();
-			trace("bmpDataBoundary"+bmpDataBoundary);
-			trace("bmpDataNoScaleBoundary"+bmpDataNoScaleBoundary);
 		}
 		
 		public function get bmpDataNoScaleBoundary():Rectangle
@@ -306,8 +305,11 @@ package sxf.apps.imageeditor.mvc.model
 			if(_zoomStep<0) _zoomStep = -_zoomStep;
 			var zoomValue:Number = calcTargetZoomValue();
 			var anchor:Point = new Point(bmpDataWidth/2,bmpDataHeight/2);
-			zoomAroundInternalPoint(zoomValue,anchor);
-			sendNotification(ImageEditorFacade.IMAGE_ZOOM,zoomValue);
+			if(zoomValue != _currentZoomValue) 
+			{
+				zoomAroundInternalPoint(zoomValue,anchor);
+				sendNotification(ImageEditorFacade.IMAGE_ZOOM,zoomValue);
+			}
 		}
 		
 		//缩小时以图片的中心点为中心
@@ -317,8 +319,11 @@ package sxf.apps.imageeditor.mvc.model
 
 			var zoomValue:Number = calcTargetZoomValue();
 			var anchor:Point = new Point(bmpDataWidth/2,bmpDataHeight/2);
-			zoomAroundInternalPoint(zoomValue,anchor);
-			sendNotification(ImageEditorFacade.IMAGE_ZOOM,zoomValue);
+			if(zoomValue != _currentZoomValue) 
+			{
+				zoomAroundInternalPoint(zoomValue,anchor);
+				sendNotification(ImageEditorFacade.IMAGE_ZOOM,zoomValue);
+			}
 		}
 			
 		public function flipImageHorizontal():void
@@ -372,8 +377,6 @@ package sxf.apps.imageeditor.mvc.model
 			endPoint = imageLocalPointToParentPoint(endPoint,cropMatrix);
 			//trace(initPoint + endPoint);
 			var cropRect:Rectangle = new Rectangle(Math.round(initPoint.x),Math.round(initPoint.y),Math.round(endPoint.x-initPoint.x),Math.round(endPoint.y-initPoint.y));
-			trace("realCropRectangle"+realCropRectangle);
-			trace("cropRect"+cropRect);
 			cropMatrix.translate(-cropRect.x,-cropRect.y);
 			var newBmpData:BitmapData = new BitmapData(realCropRectangle.width,realCropRectangle.height,true,0x000000);
 			newBmpData.draw(bmpData,cropMatrix,null,null);
@@ -400,7 +403,7 @@ package sxf.apps.imageeditor.mvc.model
 		
 		public function resizeImage(width:Number,height:Number):void
 		{
-			var newBmpData:BitmapData = ImageResizer.bilinearIterative(bmpData,width,height,ResizeMath.METHOD_PAN_AND_SCAN);
+			var newBmpData:BitmapData = ImageResizer.bilinearIterative(bmpData,width,height,ImageResizeMath.METHOD_PAN_AND_SCAN);
 			bmpData = newBmpData;
 			sendNotification(ImageEditorFacade.IMAGE_RESIZE);
 			

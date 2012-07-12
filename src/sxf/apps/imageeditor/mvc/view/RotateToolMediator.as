@@ -15,6 +15,16 @@ package sxf.apps.imageeditor.mvc.view
 			super(NAME, viewComponent);
 		}
 		
+		public function activateTool():void
+		{
+			rotateTool.activate();
+		}
+		
+		public function deActivateTool():void
+		{
+			rotateTool.deActivate();
+		}
+		
 		override public function onRegister():void
 		{
 			rotateTool.addEventListener(RotateToolEvent.ROTATE_IMAGE,onRotateImage);

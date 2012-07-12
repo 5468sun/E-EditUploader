@@ -7,16 +7,13 @@ package sxf.apps.imageeditor.mvc.controller
 	import sxf.apps.imageeditor.mvc.model.ImageEditorProxy;
 	import sxf.apps.imageeditor.mvc.model.ImageEditorProxy;
 	import sxf.apps.imageeditor.mvc.model.ImageService;
-	import sxf.apps.imageeditor.mvc.view.ImageDisplayMediator;
 	import sxf.apps.imageeditor.valueobjects.ImageObject;
 	
 	public class LoadImageCommand extends SimpleCommand
 	{
 		private var imageService:ImageService;
 		private var imageEditorProxy:ImageEditorProxy;
-		private var imageDisplayProxy:sxf.apps.imageeditor.mvc.model.ImageEditorProxy;
-		private var imageDisplayMediator:ImageDisplayMediator;
-		
+
 		public function LoadImageCommand()
 		{
 			super();
@@ -26,7 +23,6 @@ package sxf.apps.imageeditor.mvc.controller
 		{
 			imageService = facade.retrieveProxy(ImageService.NAME) as ImageService;
 			imageEditorProxy = facade.retrieveProxy(ImageEditorProxy.NAME) as ImageEditorProxy;
-			imageDisplayMediator = facade.retrieveProxy(ImageDisplayMediator.NAME) as ImageDisplayMediator;
 			
 			switch(notification.getName())
 			{

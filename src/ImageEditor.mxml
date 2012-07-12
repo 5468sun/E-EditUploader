@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" 
-			   xmlns:s="library://ns.adobe.com/flex/spark" 
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
 			   xmlns:mx="library://ns.adobe.com/flex/mx"
-			   minWidth="450" minHeight="430" 
-			   width="100%" height="100%"
-			   name="imageEditor"
-			   creationComplete="imageEditor_creationCompleteHandler(event)" xmlns:comps="sxf.apps.imageeditor.comps.*" xmlns:line="sxf.utils.line.*" xmlns:image="sxf.utils.image.*" xmlns:cropselector="sxf.utils.selector.cropselector.*">
+			   xmlns:comps="sxf.apps.imageeditor.comps.*"
+			   xmlns:line="sxf.utils.line.*"
+			   xmlns:image="sxf.utils.image.*"
+			   xmlns:cropselector="sxf.utils.selector.cropselector.*"
+			   width="100%" height="100%" minWidth="450" minHeight="430"
+			   creationComplete="imageEditor_creationCompleteHandler(event)" name="imageEditor"
+			   viewSourceURL="srcview/index.html">
 	<s:layout>
 		<s:VerticalLayout/>
 	</s:layout>
@@ -21,13 +24,9 @@
 			import sxf.apps.imageeditor.mvc.controller.LoadImageCommand;
 			import sxf.apps.imageeditor.mvc.model.ImageEditorProxy;
 			import sxf.apps.imageeditor.mvc.model.ImageService;
-			import sxf.apps.imageeditor.mvc.view.AntLineSelectorMediator;
 			import sxf.apps.imageeditor.mvc.view.CropSelectorMediator;
 			import sxf.apps.imageeditor.mvc.view.CropToolMediator;
-			import sxf.apps.imageeditor.mvc.view.CropperMediator;
-			import sxf.apps.imageeditor.mvc.view.EditorToolsMediator;
 			import sxf.apps.imageeditor.mvc.view.FlipToolMediator;
-			import sxf.apps.imageeditor.mvc.view.ImageDisplayMediator;
 			import sxf.apps.imageeditor.mvc.view.ImageEditorMediator;
 			import sxf.apps.imageeditor.mvc.view.ImageStageMediator;
 			import sxf.apps.imageeditor.mvc.view.ImgMapperMediator;
@@ -36,11 +35,32 @@
 			import sxf.apps.imageeditor.mvc.view.ZoomToolMediator;
 			
 			
+			public function activate():void
+			{
+				cropBtn.visible = true;
+				cropBtn.includeInLayout = true;
+				resetImageBtn.visible = true;
+				resetImageBtn.includeInLayout = true;
+				loadImageBtn.visible = false;
+				loadImageBtn.includeInLayout = false;
+			}
+			
+			public function deActivate():void
+			{
+				resetImageBtn.visible = false;
+				resetImageBtn.includeInLayout = false;
+				cropBtn.visible = false;
+				cropBtn.includeInLayout = false;
+				loadImageBtn.visible = true;
+				loadImageBtn.includeInLayout = true;
+			}
+			
 			protected function imageEditor_creationCompleteHandler(event:FlexEvent):void
 			{
 				
 				startUpConfig();
-				loadImage("../assets/Sunset.jpg");
+				deActivate();
+				//loadImage("../assets/Sunset.jpg");
 				
 			}
 			
@@ -52,8 +72,6 @@
 				facade.registerProxy(new ImageEditorProxy);
 				
 				facade.registerMediator(new ImageEditorMediator(this));
-				//facade.registerMediator(new TopInfoMediator(topInfo));
-				//facade.registerMediator(new ImageDisplayMediator(imageDisplay));
 				facade.registerMediator(new CropSelectorMediator(cropSelector));
 				facade.registerMediator(new CropToolMediator(cropTool,cropBtn));
 				facade.registerMediator(new FlipToolMediator(flipTool));
@@ -61,10 +79,7 @@
 				facade.registerMediator(new RotateToolMediator(rotateTool));
 				facade.registerMediator(new ImageStageMediator(imageStage));
 				facade.registerMediator(new TopInfoMediator(topInfo));
-				//facade.registerMediator(new EditorToolsMediator(editorTool));
 				//facade.registerMediator(new ImgMapperMediator(imgMapper));
-				//facade.registerMediator(new CropperMediator(cropSelector));
-				//facade.registerMediator(new AntLineSelectorMediator(anlineSelector));
 				
 				
 				
@@ -91,9 +106,9 @@
 				
 				facade.registerCommand(ImageEditorFacade.DEACTIVATE_CROPPER,CropActivateCommand);
 				facade.registerCommand(ImageEditorFacade.ACTIVATE_CROPPER,CropActivateCommand);
-				//facade.registerCommand(ImageEditorFacade.CROP_MOUSE_LOCATION,CropSelectCommand);
 				
-				
+				loadImageBtn.addEventListener(MouseEvent.CLICK,onLoadImageBtnClick);
+				resetImageBtn.addEventListener(MouseEvent.CLICK,onResetImageBtnClick);
 			}
 			
 			private function loadImage(url:String):void
@@ -101,6 +116,15 @@
 				dispatchEvent(new ImageEditorEvent(ImageEditorEvent.LOAD_IMAGE,false,false,url));
 			}
 			
+			private function onLoadImageBtnClick(e:MouseEvent):void
+			{
+				loadImage("../assets/Sunset.jpg");
+			}
+			
+			private function onResetImageBtnClick(e:MouseEvent):void
+			{
+				dispatchEvent(new ImageEditorEvent(ImageEditorEvent.RESET_IMAGE));
+			}
 
 		]]>
 	</fx:Script>
@@ -108,7 +132,7 @@
 		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
 	</fx:Declarations>
 	<comps:TopInfo id="topInfo" width="100%" height="20" />
-	<s:BorderContainer id="editAreaContainer" borderColor="0xff0000" width="100%" height="100%">
+	<s:BorderContainer id="editAreaContainer" borderColor="0xcccccc" width="100%" height="100%">
 		<s:layout>
 			<s:VerticalLayout paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10"/>
 		</s:layout>
@@ -119,7 +143,7 @@
 			<image:Cropper id="cropSelector" visible="false" useCustomRestrainRect="true"/>-->
 			<cropselector:CropSelector id="cropSelector" width="100%" height="100%" visible="false" />
 			
-			<comps:ImgMapper id="imgMapper" right="10" top="10" />
+			<!--<comps:ImgMapper id="imgMapper" right="10" top="10" />-->
 			<comps:ZoomTool right="0" bottom="0" id="zoomTool" skinClass="sxf.apps.imageeditor.comps.ZoomToolSkin" />
 		</s:SkinnableContainer>
 		
@@ -129,6 +153,12 @@
 		<s:Button id="cropBtn" label="裁切" width="45" />
 		<comps:FlipTool id="flipTool" skinClass="sxf.apps.imageeditor.comps.FlipToolSkin" />
 		<comps:RotateTool id="rotateTool" skinClass="sxf.apps.imageeditor.comps.RotateToolSkin" />
+		<s:Button id="loadImageBtn" label="加载图片" />
+		<s:Button id="resetImageBtn" label="复原图片" />
 	</s:HGroup>
 	<comps:CropTool id="cropTool" skinClass="sxf.apps.imageeditor.comps.CropToolSkin" visible="false" />
+	<s:HGroup>
+		
+	</s:HGroup>
+	
 </s:Application>

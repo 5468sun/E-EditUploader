@@ -18,7 +18,21 @@ package sxf.apps.imageeditor.comps
 		public function RotateTool()
 		{
 			super();
+			deActivate();
 		}
+		
+		public function activate():void
+		{
+			this.visible = true;
+			this.includeInLayout = true;
+		}
+		
+		public function deActivate():void
+		{
+			this.visible = false;
+			this.includeInLayout = false;
+		}
+		
 		override protected function partAdded(partName:String, instance:Object):void
 		{
 			switch(instance)

@@ -5,6 +5,7 @@ package sxf.apps.imageeditor.events
 	public class ImageEditorEvent extends Event
 	{
 		public static const LOAD_IMAGE:String = "loadImage";
+		public static const RESET_IMAGE:String = "resetImage";
 		
 		private var _url:String;
 		

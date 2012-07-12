@@ -37,14 +37,14 @@ package sxf.apps.imageeditor.mvc.view
 			cropTool.restrainRectangle = rectangle;
 		}
 		
-		public function deActivateCropTool():void
+		public function activateTool():void
 		{
-			cropTool.visible = false;
+			cropTool.activate();
 		}
 		
-		public function activateCropTool():void
+		public function deActivateTool():void
 		{
-			cropTool.visible = true;
+			cropTool.deActivate();
 		}
 		
 		override public function onRegister():void

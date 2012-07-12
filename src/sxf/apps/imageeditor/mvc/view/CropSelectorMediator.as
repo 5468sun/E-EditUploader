@@ -133,7 +133,9 @@ package sxf.apps.imageeditor.mvc.view
 		
 		private function onCropMouseMove(e:CropSelectorEvent):void
 		{
-			//sendNotification(ImageEditorFacade.CROP_MOUSE_LOCATION,e.initPoint);
+			var imageEditorProxy:ImageEditorProxy = facade.retrieveProxy(ImageEditorProxy.NAME) as ImageEditorProxy;
+			var newRect:Rectangle = cropSelector.cropRect;
+			imageEditorProxy.setCropRectangle(newRect);
 		}
 	}
 }

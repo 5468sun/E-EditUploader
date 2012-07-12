@@ -23,12 +23,12 @@ package sxf.apps.imageeditor.mvc.controller
 			{
 				case ImageEditorFacade.ACTIVATE_CROPPER:
 					cropselectorMediator.activateCropSelector();
-					cropToolMediator.activateCropTool();
+					cropToolMediator.activateTool();
 					break;
 				
 				case ImageEditorFacade.DEACTIVATE_CROPPER:
 					cropselectorMediator.deActivateCropSelector();
-					cropToolMediator.deActivateCropTool();
+					cropToolMediator.deActivateTool();
 					break;
 			}
 		}

@@ -10,15 +10,15 @@ package sxf.apps.imageeditor.mvc.controller
 	import sxf.apps.imageeditor.mvc.ImageEditorFacade;
 	import sxf.apps.imageeditor.mvc.model.ImageEditorProxy;
 	import sxf.apps.imageeditor.mvc.view.CropSelectorMediator;
+	import sxf.apps.imageeditor.mvc.view.FlipToolMediator;
+	import sxf.apps.imageeditor.mvc.view.ImageEditorMediator;
 	import sxf.apps.imageeditor.mvc.view.ImageStageMediator;
+	import sxf.apps.imageeditor.mvc.view.RotateToolMediator;
 	import sxf.apps.imageeditor.mvc.view.TopInfoMediator;
+	import sxf.apps.imageeditor.mvc.view.ZoomToolMediator;
 	
 	public class EditImageCommand extends SimpleCommand implements ICommand
 	{
-		private var imageStageMediator:ImageStageMediator;
-		private var imageEditorProxy:ImageEditorProxy;
-		private var cropSelectorMediator:CropSelectorMediator;
-		private var topInfoMediator:TopInfoMediator;
 		public function EditImageCommand()
 		{
 			super();
@@ -26,10 +26,14 @@ package sxf.apps.imageeditor.mvc.controller
 		
 		override public function execute(notification:INotification):void
 		{
-			imageEditorProxy = facade.retrieveProxy(ImageEditorProxy.NAME) as ImageEditorProxy;
-			imageStageMediator = facade.retrieveMediator(ImageStageMediator.NAME) as ImageStageMediator;
-			cropSelectorMediator = facade.retrieveMediator(CropSelectorMediator.NAME) as CropSelectorMediator;
-			topInfoMediator = facade.retrieveMediator(TopInfoMediator.NAME) as TopInfoMediator;
+			var imageEditorMediator:ImageEditorMediator = facade.retrieveMediator(ImageEditorMediator.NAME) as ImageEditorMediator;
+			var imageEditorProxy:ImageEditorProxy = facade.retrieveProxy(ImageEditorProxy.NAME) as ImageEditorProxy;
+			var imageStageMediator:ImageStageMediator = facade.retrieveMediator(ImageStageMediator.NAME) as ImageStageMediator;
+			var cropSelectorMediator:CropSelectorMediator = facade.retrieveMediator(CropSelectorMediator.NAME) as CropSelectorMediator;
+			var topInfoMediator:TopInfoMediator = facade.retrieveMediator(TopInfoMediator.NAME) as TopInfoMediator;
+			var zoomToolMediator:ZoomToolMediator = facade.retrieveMediator(ZoomToolMediator.NAME) as ZoomToolMediator;
+			var flipToolMediator:FlipToolMediator = facade.retrieveMediator(FlipToolMediator.NAME) as FlipToolMediator;
+			var rotateToolMediator:RotateToolMediator = facade.retrieveMediator(RotateToolMediator.NAME) as RotateToolMediator;
 			
 			switch (notification.getName())
 			{
@@ -39,6 +43,10 @@ package sxf.apps.imageeditor.mvc.controller
 					topInfoMediator.setName(imageEditorProxy.imageName);
 					topInfoMediator.setType(imageEditorProxy.imageType);
 					topInfoMediator.setSize(imageEditorProxy.bmpDataWidth +" * " + imageEditorProxy.bmpDataHeight);
+					zoomToolMediator.activateTool();
+					flipToolMediator.activateTool();
+					rotateToolMediator.activateTool();
+					imageEditorMediator.activateEditor();
 					break;
 				
 				case ImageEditorFacade.IMAGE_ZOOM:
@@ -67,8 +75,9 @@ package sxf.apps.imageeditor.mvc.controller
 					break;
 				
 				case ImageEditorFacade.IMAGE_RESET:
-					imageStageMediator.updateImageBmpData(imageEditorProxy.bmpData);
-					imageStageMediator.applyMatrix(imageEditorProxy.matrix.clone());
+					//imageStageMediator.updateImageBmpData(imageEditorProxy.orgBmpData.clone());
+					//imageStageMediator.applyMatrix(imageEditorProxy.matrix.clone());
+					imageEditorProxy.initImage(imageEditorProxy.orgBmpData.clone());
 					break;
 				
 				case ImageEditorFacade.IMAGE_DRAG:

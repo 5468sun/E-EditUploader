@@ -18,6 +18,16 @@ package sxf.apps.imageeditor.mvc.view
 			super(NAME, viewComponent);
 		}
 		
+		public function activateTool():void
+		{
+			flipTool.activate();
+		}
+		
+		public function deActivateTool():void
+		{
+			flipTool.deActivate();
+		}
+		
 		override public function onRegister():void
 		{
 			flipTool.addEventListener(FlipToolEvent.FLIP_IMAGE_HORIZONTAL,onFlipImageHorizontal);

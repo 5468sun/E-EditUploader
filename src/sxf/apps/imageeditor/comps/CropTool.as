@@ -16,7 +16,6 @@ package sxf.apps.imageeditor.comps
 		//private var _cropRectangle:Rectangle = new Rectangle();
 		private var _restrainRectangle:Rectangle = new Rectangle();
 		private var _realCropRectangle:Rectangle = new Rectangle();
-		private var _mouseLocation:Point;
 		
 		
 
@@ -41,30 +40,8 @@ package sxf.apps.imageeditor.comps
 		public function CropTool()
 		{
 			super();
-			_mouseLocation = new Point(-1,-1);
-			var fadeInEffect:Fade = new Fade(this);
-			var fadeOutEffect:Fade = new Fade(this);
-			fadeInEffect.alphaFrom = 0;
-			fadeInEffect.alphaTo = 1;
-			fadeInEffect.duration = 200;
-			fadeOutEffect.alphaFrom = 0;
-			fadeOutEffect.alphaTo = 1;
-			fadeOutEffect.duration = 200;
+			deActivate();
 		}
-
-		/*public function get cropRectangle():Rectangle
-		{
-			return _cropRectangle;
-		}
-
-		public function set scropRectangle(value:Rectangle):void
-		{
-			if(!value.equals(_cropRectangle))
-			{
-				_cropRectangle = value;
-				invalidateDisplayList();
-			}
-		}*/
 
 		public function get restrainRectangle():Rectangle
 		{
@@ -97,35 +74,28 @@ package sxf.apps.imageeditor.comps
 			
 		}
 		
-		public function get mouseLocation():Point
+		public function activate():void
 		{
-			return _mouseLocation;
+			this.visible = true;
+			this.includeInLayout = true;
 		}
 		
-		public function set mouseLocation(value:Point):void
+		public function deActivate():void
 		{
-			if(!value.equals(_mouseLocation))
-			{
-				_mouseLocation = value;
-				invalidateDisplayList();
-			}
+			this.visible = false;
+			this.includeInLayout = false;
 		}
 		
 		public function restrainStepper():void
 		{
-			trace("realCropRectangle"+realCropRectangle);
 			_xInput.minimum = 0 ;
 			_xInput.maximum = restrainRectangle.width - realCropRectangle.width;
-			trace("_xInput.maximum"+_xInput.maximum);
 			_yInput.minimum = 0 ;
 			_yInput.maximum = restrainRectangle.height - realCropRectangle.height;
-			trace("_yInput.maximum"+_yInput.maximum);
 			_wInput.minimum = 0;
 			_wInput.maximum = restrainRectangle.width - realCropRectangle.x;
-			trace("_wInput.maximum"+_wInput.maximum);
 			_hInput.minimum = 0;
 			_hInput.maximum = restrainRectangle.height - realCropRectangle.y;
-			trace("_hInput.maximum"+_hInput.maximum);
 		}
 		
 		override protected function partAdded(partName:String, instance:Object):void

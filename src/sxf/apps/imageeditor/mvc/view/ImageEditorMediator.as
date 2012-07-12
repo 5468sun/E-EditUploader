@@ -18,13 +18,28 @@ package sxf.apps.imageeditor.mvc.view
 		{
 			super(NAME, viewComponent);
 			imageEditor.addEventListener(ImageEditorEvent.LOAD_IMAGE,loadImageHandler);
+			imageEditor.addEventListener(ImageEditorEvent.RESET_IMAGE,resetImageHandler);
 		}
 		
+		public function activateEditor():void
+		{
+			imageEditor.activate();
+		}
+		
+		public function deActivateEditor():void
+		{
+			imageEditor.deActivate();
+		}
 		
 		private function loadImageHandler(e:ImageEditorEvent):void
 		{
 			var url:String = e.url;
 			sendNotification(ImageEditorFacade.LOAD_IMAGE,url);
+		}
+		
+		private function resetImageHandler(e:ImageEditorEvent):void
+		{
+			sendNotification(ImageEditorFacade.IMAGE_RESET);
 		}
 		
 		protected function get imageEditor():ImageEditor

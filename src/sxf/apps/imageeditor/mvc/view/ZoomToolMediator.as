@@ -16,6 +16,16 @@ package sxf.apps.imageeditor.mvc.view
 			super(NAME, viewComponent);
 		}
 		
+		public function activateTool():void
+		{
+			zoomTool.activate();
+		}
+		
+		public function deActivateTool():void
+		{
+			zoomTool.deActivate();
+		}
+		
 		override public function onRegister():void
 		{
 			zoomTool.addEventListener(ZoomToolEvent.ZOOM_IN,onZoomIn);

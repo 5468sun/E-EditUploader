@@ -63,6 +63,8 @@ package sxf.apps.imageeditor.comps
 		{
 			_bmpData = value;
 			_bmpDataChanged = true;
+			initCursorSys();
+			initImageDrag();
 			invalidateProperties();
 		}
 
@@ -102,11 +104,11 @@ package sxf.apps.imageeditor.comps
 
 				
 				case _fillingRect:
-					initCursorSys();
+					//do nothing
 					break;
 				
 				case _image:
-					initImageDrag();
+					//do nothing
 					break;
 				
 				case _background:

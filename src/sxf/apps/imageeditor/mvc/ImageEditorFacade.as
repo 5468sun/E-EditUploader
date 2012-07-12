@@ -76,7 +76,6 @@ package sxf.apps.imageeditor.mvc
 		public static const IMAGE_RESIZE:String = "imageResize";
 		public static const IMAGE_RESET:String = "imageReset";
 		public static const IMAGE_DRAG:String = "imageDraged";
-		//public static const IMAGE_CENTER:String = "imageCentered";
 		
 		public static const CROP_RESTRAIN_CHANGE:String = "cropRestrainChange";
 		public static const STEPPER_RESTRAIN_CHANGE:String = "stepperRestrainChange";
@@ -87,7 +86,6 @@ package sxf.apps.imageeditor.mvc
 		public static const ROTATE_IMAGE:String = "rotateImage";
 		public static const FLIP_IMAGE_HORIZONTAL:String = "flipImageHorizontal";
 		public static const FLIP_IMAGE_VERICAL:String = "flipImageVertical";
-		//public static const ROTATE_FLIP_CANCEL:String = "rotateFlipCancel";
 		
 		public static const ACTIVATE_CROPPER:String = "activateCropper";
 		public static const DEACTIVATE_CROPPER:String = "deActivateCropper";
