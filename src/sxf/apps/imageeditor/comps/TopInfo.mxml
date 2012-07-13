@@ -39,7 +39,6 @@
 			public function updateZoom(value:Number):void
 			{
 				fielZoom.text = Math.round(value*100) + "%";
-				//fielZoom.text = String(value);
 			}
 		]]>
 	</fx:Script>
