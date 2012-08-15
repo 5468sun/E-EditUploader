@@ -372,6 +372,7 @@
 				
 					case "delBtn":
 						
+						
 						dispatchEvent(new ItemHandleEvent(ItemHandleEvent.DELETE_ITEM,false,false,index));
 						break;
 					

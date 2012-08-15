@@ -17,12 +17,12 @@ package sxf.apps.imageuploader.events{
 			
 			return _index;
 		}
-
+		
 		public function set index(value:int):void{
 			
 			_index = value;
 		}
-
+		
 		
 		public function ItemHandleEvent(type:String, bubbles:Boolean=false, cancelable:Boolean=false, index:int=NaN){
 			
@@ -32,7 +32,7 @@ package sxf.apps.imageuploader.events{
 		}
 		
 		override public function clone():Event{
-		
+			
 			return new ItemHandleEvent(type, bubbles, cancelable, index);
 			
 		}

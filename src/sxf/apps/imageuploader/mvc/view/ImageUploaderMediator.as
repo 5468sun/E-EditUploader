@@ -10,7 +10,6 @@ package sxf.apps.imageuploader.mvc.view{
 	
 	import spark.components.Button;
 	
-	import sxf.apps.imageuploader.events.ImageUploaderEvent;
 	import sxf.apps.imageuploader.mvc.UploaderFacade;
 	import sxf.comps.localfileloader.LocalFileBrowseEvent;
 	import sxf.comps.localfileloader.LocalFileBrowser;
