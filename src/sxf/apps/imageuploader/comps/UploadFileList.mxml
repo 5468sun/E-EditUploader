@@ -1,0 +1,413 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:DataGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+						  xmlns:s="library://ns.adobe.com/flex/spark" 
+						  xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" height="100%" 
+						  itemRenderer="sxf.apps.imageuploader.comps.UploadFileListItemRenderer"
+						  dataProvider="{listData}" initialize="initializeHandler(event)">
+	<s:layout>
+		<s:VerticalLayout/>
+	</s:layout>
+	<fx:Script>
+		<![CDATA[
+			import flash.utils.getDefinitionByName;
+			
+			import mx.collections.ArrayList;
+			import mx.controls.Image;
+			import mx.controls.ProgressBar;
+			import mx.core.BitmapAsset;
+			import mx.events.FlexEvent;
+			
+			import spark.components.Label;
+			import spark.events.RendererExistenceEvent;
+			
+			import sxf.apps.imageuploader.events.ItemHandleEvent;
+			import sxf.apps.imageuploader.valueobjects.FileObject;
+			
+			[Bindable]
+			private var listData:ArrayList = new ArrayList();
+			
+			private var _editingIndex:int = NaN;
+	
+			[Embed(source="../assets/empty_thumb.png")]
+			public var EmptyThumb:Class;
+			[Bindable]
+			public var emptyThumb:BitmapData;
+			
+			// state icons
+			
+			[Embed(source="../assets/load_begin.png")]
+			private var LoadBeginIcon:Class;
+			[Bindable]
+			public var loadBeginIcon:BitmapData;
+			
+			[Embed(source="../assets/progress.png")]
+			private var LoadProgressIcon:Class;
+			[Bindable]
+			public var loadProgressIcon:BitmapData;
+			
+			[Embed(source="../assets/load_complete.png")]
+			private var LoadCompleteIcon:Class;
+			[Bindable]
+			public var loadCompleteIcon:BitmapData;
+			
+			[Embed(source="../assets/load_error.png")]
+			private var LoadErrorIcon:Class;
+			[Bindable]
+			public var loadErrorIcon:BitmapData;
+			
+			[Embed(source="../assets/parse_begin.png")]
+			private var ParseBeginIcon:Class;
+			[Bindable]
+			public var parseBeginIcon:BitmapData;
+			
+			[Embed(source="../assets/progress.png")]
+			private var ParseProgressIcon:Class;
+			[Bindable]
+			public var parseProgressIcon:BitmapData;
+			
+			[Embed(source="../assets/parse_complete.png")]
+			private var ParseCompleteIcon:Class;
+			[Bindable]
+			public var parseCompleteIcon:BitmapData;
+			
+			[Embed(source="../assets/parse_error.png")]
+			private var ParseErrorIcon:Class;
+			[Bindable]
+			public var parseErrorIcon:BitmapData;
+			
+
+			
+			[Embed(source="../assets/upload_begin.png")]
+			private var UploadBeginIcon:Class;
+			[Bindable]
+			public var uploadBeginIcon:BitmapData;
+			
+			[Embed(source="../assets/progress.png")]
+			private var UploadProgressIcon:Class;
+			[Bindable]
+			public var uploadProgressIcon:BitmapData;
+			
+			[Embed(source="../assets/upload_complete.png")]
+			private var UploadCompleteIcon:Class;
+			[Bindable]
+			public var uploadCompleteIcon:BitmapData;
+			
+			[Embed(source="../assets/upload_error.png")]
+			private var UploadErrorIcon:Class;
+			[Bindable]
+			public var uploadErrorIcon:BitmapData;
+			
+			
+			[Embed(source="../assets/picture_edit.png")]
+			private var EditProgressIcon:Class;
+			[Bindable]
+			public var editProgressIcon:BitmapData;
+			
+			[Embed(source="../assets/upload_waitting.png")]
+			private var UploadWaitIcon:Class;
+			[Bindable]
+			public var uploadWaitIcon:BitmapData;
+			
+			[Embed(source="../assets/upload_abort.png")]
+			private var UploadAbortIcon:Class;
+			[Bindable]
+			public var uploadAbortIcon:BitmapData;
+			
+			[Embed(source="../assets/upload_error.png")]
+			private var UploadTimeoutIcon:Class;
+			[Bindable]
+			public var uploadTimeoutIcon:BitmapData;
+			
+			protected function initializeHandler(event:FlexEvent):void
+			{
+				this.addEventListener(RendererExistenceEvent.RENDERER_ADD,onRendererAdd);
+				this.addEventListener(RendererExistenceEvent.RENDERER_REMOVE,onRendererRemove);
+			}
+			
+			// API functions////////////////////////
+			
+			public function addItemAt(item:FileObject,index:int):void
+			{
+				if(listData.length == 0)
+				{
+					loadIcons();
+				}
+				listData.addItemAt(item,index);
+			}
+			
+			public function removeItemAt(index:int):void
+			{
+				
+				listData.removeItemAt(index);
+				
+				if(listData.length == 0)
+				{
+					clearIcons();
+				}
+				
+			}
+			
+			public function updateStateAt(state:String,index:int):void
+			{
+				var renderItem:UploadFileListItemRenderer = this.getElementAt(index) as UploadFileListItemRenderer;
+				switch(state)
+				{
+					case FileObject.LOAD_BEGIN:
+						//renderItem.currentState = "loadBegin";
+						renderItem.setStateUpdateView("loadBegin");
+						break;
+					
+					case FileObject.LOAD_PROGRESS:
+						//renderItem.currentState = "loadProgress";
+						renderItem.setStateUpdateView("loadProgress");
+						break;
+					
+					case FileObject.LOAD_COMPLETE:
+						//renderItem.currentState = "loadComplete";
+						renderItem.setStateUpdateView("loadComplete");
+						break;
+					
+					case FileObject.LOAD_ERROR:
+						//renderItem.currentState = "loadError";
+						renderItem.setStateUpdateView("loadError");
+						break;
+					
+					case FileObject.PARSE_BEGIN:
+						//renderItem.currentState = "parseBegin";
+						renderItem.setStateUpdateView("parseBegin");
+						break;
+					
+					case FileObject.PARSE_PROGRESS:
+						//renderItem.currentState = "parseProgress";
+						renderItem.setStateUpdateView("parseProgress");
+						break;
+					
+					case FileObject.PARSE_COMPLETE:
+						//renderItem.currentState = "parseComplete";
+						renderItem.setStateUpdateView("parseComplete");
+						break;
+					
+					case FileObject.PARSE_ERROR:
+						//renderItem.currentState = "parseError";
+						renderItem.setStateUpdateView("parseError");
+						break;
+					
+					case FileObject.UPLOAD_BEGIN:
+						//renderItem.currentState = "uploadBegin";
+						renderItem.setStateUpdateView("uploadBegin");
+						break;
+					
+					case FileObject.UPLOAD_PROGRESS:
+						//renderItem.currentState = "uploadProgress";
+						renderItem.setStateUpdateView("uploadProgress");
+						break;
+					
+					case FileObject.UPLOAD_COMPLETE:
+						//renderItem.currentState = "uploadComplete";
+						renderItem.setStateUpdateView("uploadComplete");
+						break;
+					
+					case FileObject.UPLOAD_ERROR:
+						//renderItem.currentState = "uploadError";
+						renderItem.setStateUpdateView("uploadError");
+						break;
+				}
+
+			}
+			
+			public function updatePhaseAt(phase:String,index:int):void
+			{
+				var renderItem:UploadFileListItemRenderer = this.getElementAt(index) as UploadFileListItemRenderer;
+				switch(phase)
+				{
+					case FileObject.OPERATE_NOT:
+						break;
+					
+					case FileObject.OPERATE_WAITTING:
+						break;
+					
+					case FileObject.OPERATE_DOING:
+						break;
+				}
+			}
+			
+			public function updateProgressBarAt(percent:Number,index:int):void
+			{
+				var listItem:UploadFileListItemRenderer = this.getElementAt(index) as UploadFileListItemRenderer;
+				listItem.setProgressBarLabel(Math.ceil(percent*100)+"%");
+				listItem.setItemProgress(percent);
+			}
+			
+			public function enableInteraction():void{
+			
+				/* var uploadFileItem:UploadFileListItemRenderer;
+				
+				for(var i:int; i<numElements; i++){
+					
+					uploadFileItem = this.getElementAt(i) as UploadFileListItemRenderer;
+					uploadFileItem.addEventListener(MouseEvent.CLICK,onRendererClick);
+					trace(uploadFileItem.prevState);
+					uploadFileItem.currentState = uploadFileItem.prevState;
+					
+				} */
+			
+			}
+			
+			public function disableInteraction():void{
+			
+				/* var uploadFileItem:UploadFileListItemRenderer;
+				
+				for(var i:int; i<numElements; i++){
+					
+					uploadFileItem = this.getElementAt(i) as UploadFileListItemRenderer;
+					uploadFileItem.removeEventListener(MouseEvent.CLICK,onRendererClick);
+					
+					uploadFileItem.prevState = uploadFileItem.currentState;
+					uploadFileItem.currentState = "disable";
+				} */
+			
+			}
+			
+			// getter setter functions//////////////
+			
+			
+			/* public function get editingIndex():int
+			{
+				return _editingIndex;
+			}
+			
+			public function set editingIndex(value:int):void
+			{
+				_editingIndex = value;
+			}
+			
+			public function get dataLength():int{
+			
+				return listData.length;
+			
+			}
+			 */
+			// util functions //////////////////
+			
+			private function loadIcons():void{
+			
+				emptyThumb =  getBmpDataByName(EmptyThumb);
+				
+				loadBeginIcon =  getBmpDataByName(LoadBeginIcon);
+				loadProgressIcon =  getBmpDataByName(LoadProgressIcon);
+				loadCompleteIcon =  getBmpDataByName(LoadCompleteIcon);
+				loadErrorIcon =  getBmpDataByName(LoadErrorIcon);
+				
+				parseBeginIcon =  getBmpDataByName(ParseBeginIcon);
+				parseProgressIcon =  getBmpDataByName(ParseProgressIcon);
+				parseCompleteIcon =  getBmpDataByName(ParseCompleteIcon);
+				parseErrorIcon =  getBmpDataByName(ParseErrorIcon);
+				
+				uploadBeginIcon =  getBmpDataByName(UploadBeginIcon);
+				uploadProgressIcon =  getBmpDataByName(UploadProgressIcon);
+				uploadCompleteIcon =  getBmpDataByName(UploadCompleteIcon);
+				uploadErrorIcon =  getBmpDataByName(UploadErrorIcon);
+				
+				uploadAbortIcon =  getBmpDataByName(UploadAbortIcon);
+				uploadTimeoutIcon =  getBmpDataByName(UploadTimeoutIcon);
+				editProgressIcon =  getBmpDataByName(EditProgressIcon);
+				uploadWaitIcon =  getBmpDataByName(UploadWaitIcon);
+			}
+			
+			private function clearIcons():void{
+			
+				emptyThumb = null;
+				
+				loadBeginIcon =  null;
+				loadProgressIcon = null;
+				loadCompleteIcon = null;
+				loadErrorIcon = null;
+				parseBeginIcon = null;
+				parseProgressIcon = null;
+				parseCompleteIcon = null;
+				parseErrorIcon = null;
+				uploadWaitIcon = null;
+				uploadBeginIcon = null;
+				uploadProgressIcon = null;
+				uploadCompleteIcon = null;
+				uploadAbortIcon = null;
+				uploadErrorIcon = null;
+				uploadTimeoutIcon = null;
+				editProgressIcon = null;
+			
+			}
+			
+			
+			private function getBmpDataByName(ClassName:Class):BitmapData{
+
+				var bmpInstance:BitmapAsset = new ClassName();  
+				return bmpInstance.bitmapData;
+	
+			}
+
+			// event handlers/////////////////////
+			
+			private function onRendererAdd(e:RendererExistenceEvent):void{
+			
+				var renderer:UploadFileListItemRenderer = e.renderer as UploadFileListItemRenderer;
+				renderer.addEventListener(MouseEvent.CLICK,onRendererClick);
+			}
+			
+			private function onRendererRemove(e:RendererExistenceEvent):void{
+				
+				var renderer:UploadFileListItemRenderer = e.renderer as UploadFileListItemRenderer;
+				renderer.removeEventListener(MouseEvent.CLICK,onRendererClick);
+				renderer.destroy();
+
+			}
+			
+			private function onRendererClick(e:MouseEvent):void{
+			
+				var label:Label = e.target as Label;
+				if(label == null) return;
+				var renderer:UploadFileListItemRenderer = e.currentTarget as UploadFileListItemRenderer;
+				var index:int = this.getElementIndex(renderer);
+				
+				switch (label.id){
+				
+					case "delBtn":
+						
+						dispatchEvent(new ItemHandleEvent(ItemHandleEvent.DELETE_ITEM,false,false,index));
+						break;
+					
+					case "editBtn":
+						
+						dispatchEvent(new ItemHandleEvent(ItemHandleEvent.EDIT_ITEM,false,false,index));
+						break;
+					
+					case "reloadBtn":
+						
+						dispatchEvent(new ItemHandleEvent(ItemHandleEvent.RELOAD_ITEM,false,false,index));
+						break;
+					
+					case "uploadBtn":
+						
+						dispatchEvent(new ItemHandleEvent(ItemHandleEvent.UPLOAD_ITEM,false,false,index));
+						break;
+					
+					
+					case "reUploadBtn":
+						
+						dispatchEvent(new ItemHandleEvent(ItemHandleEvent.REUPLOAD_ITEM,false,false,index));
+						break;
+					
+					case "cancelBtn":
+						
+						dispatchEvent(new ItemHandleEvent(ItemHandleEvent.CANCEL_UPLOAD_ITEM,false,false,index));
+						break;
+				
+				}
+			
+			}
+
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+</s:DataGroup>

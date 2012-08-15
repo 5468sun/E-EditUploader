@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx"
+				width="100%"
+				initialize="initializeHandler(event)">
+	<s:layout>
+		<s:BasicLayout/>
+	</s:layout>
+	<s:states>
+		<s:State name="loadBegin"/>
+		<s:State name="loadProgress"/>
+		<s:State name="loadComplete"/>
+		<s:State name="loadError"/>
+		<s:State name="parseBegin"/>
+		<s:State name="parseProgress"/>
+		<s:State name="parseComplete"/>
+		<s:State name="parseError"/>
+		<s:State name="uploadBegin"/>
+		<s:State name="uploadProgress"/>
+		<s:State name="uploadComplete"/>
+		<s:State name="uploadError"/>
+		<s:State name="uploadTimeout"/>
+		<s:State name="editProgress"/>
+		<s:State name="uploadWaitting"/>
+		<s:State name="uploadAbort"/>
+	</s:states>
+	<fx:Script>
+		<![CDATA[
+			import mx.core.BitmapAsset;
+			import mx.events.FlexEvent;
+			
+			private var _prevState:String;
+
+			[Bindable]
+			private var uploadFileList:UploadFileList;
+
+			// API functions ////////////////////
+			
+			public function setProgressBarLabel(text:String):void{
+				
+				progressBar.label = text;
+				
+			}
+			
+			public function setItemProgress(percent:Number):void{
+				
+				progressBar.setProgress(100*percent,100);
+				
+				
+			}
+			
+			public function setStateUpdateView(state:String):void
+			{
+				this.currentState = state;
+				var thumbImageBmpAsset:BitmapAsset;
+				var stateIndicatorBmpAsset:BitmapAsset;
+				switch(currentState)
+				{
+					case "loadBegin":
+						thumbImageBmpAsset = new BitmapAsset(uploadFileList.emptyThumb);
+						thumbImage.source = thumbImageBmpAsset;
+						
+						stateIndicatorBmpAsset = new BitmapAsset(uploadFileList.loadBeginIcon);
+						stateIndicator.source = stateIndicatorBmpAsset;
+						
+						progressBar.visible = true;
+						progressBar.includeInLayout = true;
+						break;
+					
+					case "loadProgress":
+						stateIndicatorBmpAsset = new BitmapAsset(uploadFileList.loadProgressIcon);
+						stateIndicator.source = stateIndicatorBmpAsset;
+						break;
+					
+					case "loadComplete":
+						stateIndicatorBmpAsset = new BitmapAsset(uploadFileList.loadCompleteIcon);
+						stateIndicator.source = stateIndicatorBmpAsset;
+						
+						progressBar.visible = false;
+						progressBar.includeInLayout = false;
+						break;
+					
+					case "loadError":
+						stateIndicatorBmpAsset = new BitmapAsset(uploadFileList.loadErrorIcon);
+						stateIndicator.source = stateIndicatorBmpAsset;
+						break;
+					
+					case "parseBegin":
+						stateIndicatorBmpAsset = new BitmapAsset(uploadFileList.parseBeginIcon);
+						stateIndicator.source = stateIndicatorBmpAsset;
+						
+						progressBar.visible = true;
+						progressBar.includeInLayout = true;
+						break;
+					
+					case "parseProgress":
+						stateIndicatorBmpAsset = new BitmapAsset(uploadFileList.parseProgressIcon);
+						stateIndicator.source = stateIndicatorBmpAsset;
+						break;
+					
+					case "parseComplete":
+						thumbImageBmpAsset = new BitmapAsset(data.bmpData);
+						thumbImage.source = thumbImageBmpAsset;
+						
+						stateIndicatorBmpAsset = new BitmapAsset(uploadFileList.parseCompleteIcon);
+						stateIndicator.source = stateIndicatorBmpAsset;
+						
+						progressBar.visible = false;
+						progressBar.includeInLayout = false;
+						break;
+					
+					case "parseError":
+						stateIndicatorBmpAsset = new BitmapAsset(uploadFileList.parseErrorIcon);
+						stateIndicator.source = stateIndicatorBmpAsset;
+						break;
+					
+					case "uploadBegin":
+						stateIndicatorBmpAsset = new BitmapAsset(uploadFileList.uploadBeginIcon);
+						stateIndicator.source = stateIndicatorBmpAsset;
+						
+						progressBar.visible = true;
+						progressBar.includeInLayout = true;
+						break;
+					
+					case "uploadProgress":
+						stateIndicatorBmpAsset = new BitmapAsset(uploadFileList.uploadProgressIcon);
+						stateIndicator.source = stateIndicatorBmpAsset;
+						
+						progressBar.visible = true;
+						progressBar.includeInLayout = true;
+						break;
+					
+					case "uploadComplete":
+						stateIndicatorBmpAsset = new BitmapAsset(uploadFileList.uploadCompleteIcon);
+						stateIndicator.source = stateIndicatorBmpAsset;
+						
+						progressBar.visible = false;
+						progressBar.includeInLayout = false;
+						break;
+					
+					case "uploadError":
+						stateIndicatorBmpAsset = new BitmapAsset(uploadFileList.uploadErrorIcon);
+						stateIndicator.source = stateIndicatorBmpAsset;
+						break; 
+				}
+			}
+			
+			/* public function showItemProgress():void{
+				
+				progressBar.visible = true;
+
+			}
+			
+			public function hideItemProgress():void{
+				
+				progressBar.visible = false;
+				
+			}
+			 */
+
+			/* public function showThumb(bmpAsset:BitmapAsset):void{				
+				
+				thumbImage.source = bmpAsset;
+			
+			}
+			 */
+			/* public function setStateIndicator(bmpAsset:BitmapAsset):void{
+			
+				stateIndicator.source = bmpAsset;
+			
+			} */
+			
+			//getter setter functions////////////////////
+			
+			/* public function get prevState():String
+			{
+				return _prevState;
+			}
+			
+			public function set prevState(value:String):void
+			{
+				_prevState = value;
+			} */
+			
+			public function destroy():void{
+			
+				thumbImage.source = null;
+				stateIndicator.source = null;
+			
+			}
+			
+			// override functions ////////////////////
+			
+			/* override protected function getCurrentRendererState():String{
+				
+				return currentState;
+				
+			} */
+		
+
+			protected function initializeHandler(event:FlexEvent):void
+			{
+				uploadFileList = this.owner as UploadFileList;
+			}
+
+			protected function itemrendererStateChangeCompleteHandler(event:FlexEvent):void
+			{
+				trace("itemrendererStateChangeCompleteHandler_"+currentState);
+				var thumbImageBmpAsset:BitmapAsset;
+				var stateIndicatorBmpAsset:BitmapAsset;
+				switch(currentState)
+				{
+					case "loadBegin":
+						thumbImageBmpAsset = new BitmapAsset(uploadFileList.emptyThumb);
+						thumbImage.source = thumbImageBmpAsset;
+						
+						stateIndicatorBmpAsset = new BitmapAsset(uploadFileList.loadBeginIcon);
+						stateIndicator.source = stateIndicatorBmpAsset;
+						
+						progressBar.visible = true;
+						//progressBar.includeInLayout = true;
+						break;
+					
+					case "loadProgress":
+						stateIndicatorBmpAsset = new BitmapAsset(uploadFileList.loadProgressIcon);
+						stateIndicator.source = stateIndicatorBmpAsset;
+						break;
+					
+					case "loadComplete":
+						stateIndicatorBmpAsset = new BitmapAsset(uploadFileList.loadCompleteIcon);
+						stateIndicator.source = stateIndicatorBmpAsset;
+						
+						progressBar.visible = false;
+						//progressBar.includeInLayout = false;
+						break;
+					
+					case "loadError":
+						stateIndicatorBmpAsset = new BitmapAsset(uploadFileList.loadErrorIcon);
+						stateIndicator.source = stateIndicatorBmpAsset;
+						break;
+					
+					case "parseBegin":
+						stateIndicatorBmpAsset = new BitmapAsset(uploadFileList.parseBeginIcon);
+						stateIndicator.source = stateIndicatorBmpAsset;
+						
+						progressBar.visible = true;
+						//progressBar.includeInLayout = true;
+						break;
+					
+					case "parseProgress":
+						stateIndicatorBmpAsset = new BitmapAsset(uploadFileList.parseProgressIcon);
+						stateIndicator.source = stateIndicatorBmpAsset;
+						break;
+					
+					case "parseComplete":
+						thumbImageBmpAsset = new BitmapAsset(data.bmpData);
+						thumbImage.source = thumbImageBmpAsset;
+						
+						stateIndicatorBmpAsset = new BitmapAsset(uploadFileList.parseCompleteIcon);
+						stateIndicator.source = stateIndicatorBmpAsset;
+						
+						progressBar.visible = false;
+						//progressBar.includeInLayout = false;
+						break;
+					
+					case "parseError":
+						stateIndicatorBmpAsset = new BitmapAsset(uploadFileList.parseErrorIcon);
+						stateIndicator.source = stateIndicatorBmpAsset;
+						break;
+					
+					case "uploadBegin":
+						stateIndicatorBmpAsset = new BitmapAsset(uploadFileList.uploadBeginIcon);
+						stateIndicator.source = stateIndicatorBmpAsset;
+						
+						progressBar.visible = true;
+						//progressBar.includeInLayout = true;
+						break;
+					
+					case "uploadProgress":
+						stateIndicatorBmpAsset = new BitmapAsset(uploadFileList.uploadProgressIcon);
+						stateIndicator.source = stateIndicatorBmpAsset;
+						
+						progressBar.visible = true;
+						//progressBar.includeInLayout = true;
+						break;
+					
+					case "uploadComplete":
+						stateIndicatorBmpAsset = new BitmapAsset(uploadFileList.uploadCompleteIcon);
+						stateIndicator.source = stateIndicatorBmpAsset;
+						
+						progressBar.visible = false;
+						//progressBar.includeInLayout = false;
+						break;
+					
+					case "uploadError":
+						stateIndicatorBmpAsset = new BitmapAsset(uploadFileList.uploadErrorIcon);
+						stateIndicator.source = stateIndicatorBmpAsset;
+						break; 
+				}
+
+			}
+			
+			
+		]]>
+	</fx:Script>
+	<s:BorderContainer width="66" height="66" left="0" top="0">
+		<mx:Image id="thumbImage" width="64" height="64" source="{null}" left="0" top="0" horizontalAlign="center" verticalAlign="middle" />	
+		<mx:Image id="stateIndicator" width="12" height="12" source="{null}" right="0" bottom="0"/>
+	</s:BorderContainer>
+	<s:Group left="70" top="0" width="100%">
+		<s:VGroup>
+			<s:Label id="fileName" text="{data.name}" paddingTop="3" />
+			<s:Label text="({Math.round(data.size/1024)}kb {data.width}x{data.height})" />
+			<mx:ProgressBar id="progressBar" mode="manual" labelPlacement="right" />
+		</s:VGroup>
+		
+		<s:HGroup right="0" top="0">
+			<s:Label id="reloadBtn" text="重新加载" includeIn="loadError,parseError" />
+			<s:Label id="uploadBtn" text="上传" includeIn="parseComplete" />
+			<s:Label id="reUploadBtn" text="重新上传" includeIn="uploadAbort,uploadError" />
+			<s:Label id="cancelBtn" text="取消" includeIn="uploadBegin" />
+			<s:Label id="editBtn" text="编辑" includeIn="editProgress" />
+			<s:Label id="delBtn" text="删除" excludeFrom="editProgress" />
+		</s:HGroup>
+		
+	</s:Group>
+</s:ItemRenderer>

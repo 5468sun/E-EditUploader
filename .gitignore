@@ -5,26 +5,15 @@ bin-release/
 # Project property files
 .actionScriptProperties
 .flexProperties
-.settings/
 .project
 
 
 # Flash Builder
 .FlexUnitSettings/
+.settings/
 
 # My Convention
-_bak/
 libs/
 assets/
 
 # Project Spec
-src/sxf/apps/edituploader
-src/sxf/apps/imageuploader
-src/CropperAndAntline.mxml
-src/EmbedInIteRendererExample.mxml
-src/ImageUploader.mxml
-src/Item.mxml
-src/MyList.mxml
-src/TestImageService.mxml
-src/TestMatrix.mxml
-src/UploadProgressSample.mxml
