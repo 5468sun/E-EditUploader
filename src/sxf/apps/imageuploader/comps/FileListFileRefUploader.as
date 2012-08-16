@@ -7,12 +7,15 @@ package sxf.apps.imageuploader.comps
 	import flash.net.URLRequest;
 	import flash.net.URLRequestMethod;
 	
+	import mx.core.FlexGlobals;
+	
 	import sxf.apps.imageuploader.events.FileListOperateEvent;
 	import sxf.apps.imageuploader.valueobjects.FileObject;
 
 	public class FileListFileRefUploader extends FileListOperator
 	{
-		public static const SERVER_PATH:String = "http://127.0.0.1/F-FileUploader/php/uploader_fileRef.php";
+		private var _uploadURL:String = "http://127.0.0.1/F-FileUploader/php/uploader_fileRef.php";
+		//public static var SERVER_PATH:String = "";
 		//http://www.youtowork.com/sunxingfei/imageuploader/uploader_fileRef.php
 		//http://127.0.0.1/F-FileUploader/php/uploader_fileRef.php
 		
@@ -32,10 +35,9 @@ package sxf.apps.imageuploader.comps
 			super.operatorExecute(index);
 			var operator:FileReference = _operatorList[index] as FileReference;
 			var urlRequest:URLRequest = new URLRequest();
-			urlRequest.url = SERVER_PATH;
-			//urlRequest.method = URLRequestMethod.POST;
-			//urlRequest.contentType = "application/octet-stream";
+			urlRequest.url = FlexGlobals.topLevelApplication.parameters.uploadURL || _uploadURL;
 			operator.upload(urlRequest);
+			
 		}
 		
 		override protected function operatorCancel(index:int):void

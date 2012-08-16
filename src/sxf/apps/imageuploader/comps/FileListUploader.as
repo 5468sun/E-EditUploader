@@ -8,13 +8,14 @@ package sxf.apps.imageuploader.comps{
 	import flash.net.URLRequest;
 	import flash.net.URLRequestMethod;
 	
+	import mx.core.FlexGlobals;
+	
 	import sxf.apps.imageuploader.events.FileListOperateEvent;
-	import sxf.apps.imageuploader.events.FileObjectEvent;
 	import sxf.apps.imageuploader.valueobjects.FileObject;
 	
 	public class FileListUploader extends FileListOperator{
-		
-		public static const SERVER_PATH:String = "http://127.0.0.1/F-FileUploader/php/uploader.php";
+
+		private var _uploadURL:String = "http://127.0.0.1/F-FileUploader/php/uploader.php";
 		//http://www.youtowork.com/sunxingfei/imageuploader/uploader.php
 		//http://127.0.0.1/F-FileUploader/php/uploader.php
 		public function FileListUploader(concurrentNum:uint=0){
@@ -48,7 +49,7 @@ package sxf.apps.imageuploader.comps{
 			var operator:URLLoader = _operatorList[index] as URLLoader;
 			
 			var urlRequest:URLRequest = new URLRequest();
-			urlRequest.url = SERVER_PATH +"?imgName="+_fileList[index].name;
+			urlRequest.url = (FlexGlobals.topLevelApplication.parameters.uploadURL || _uploadURL) +"?imgName="+_fileList[index].name;
 			urlRequest.data = _fileList[index].data;
 			urlRequest.method = URLRequestMethod.POST;
 			urlRequest.contentType = "application/octet-stream";

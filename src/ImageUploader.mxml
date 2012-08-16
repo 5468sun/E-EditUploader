@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" 
 			   xmlns:s="library://ns.adobe.com/flex/spark" 
-			   xmlns:mx="library://ns.adobe.com/flex/mx" minWidth="300" minHeight="400" xmlns:comps="sxf.apps.imageuploader.comps.*"
+			   xmlns:mx="library://ns.adobe.com/flex/mx" minWidth="300" minHeight="150" xmlns:comps="sxf.apps.imageuploader.comps.*"
 			   creationComplete="onCreationCompleteHandler(event)">
 	
 	
@@ -13,77 +13,31 @@
 	</fx:Declarations>
 	<fx:Script>
 		<![CDATA[
-			import mx.core.BitmapAsset;
-			
+			import mx.core.FlexGlobals;
 			import mx.events.FlexEvent;
 			
 			import sxf.apps.imageuploader.mvc.UploaderFacade;
-			import sxf.apps.imageuploader.mvc.controller.FileBrowseCommand;
-			import sxf.apps.imageuploader.mvc.controller.FileListCommand;
-			import sxf.apps.imageuploader.mvc.controller.FileOperateCommand;
-			import sxf.apps.imageuploader.mvc.model.UploaderProxy;
-			import sxf.apps.imageuploader.mvc.view.ImageUploaderMediator;
-			import sxf.apps.imageuploader.mvc.view.LocalFileBrowserMediator;
-			import sxf.apps.imageuploader.mvc.view.UploadFileListMediator;
+			import sxf.apps.imageuploader.mvc.controller.StartupCommand;
 			
 			protected function onCreationCompleteHandler(event:FlexEvent):void
 			{
-				startUpConfig();
+				startup();
 			}
 			
-			private function startUpConfig():void
+			private function startup():void
 			{
 				var facade:UploaderFacade = UploaderFacade.getInstance();
-				
-				facade.registerProxy(new UploaderProxy());
-				
-				facade.registerMediator(new ImageUploaderMediator(this));
-				facade.registerMediator(new LocalFileBrowserMediator(browseBtn));
-				facade.registerMediator(new UploadFileListMediator(uploadFileList));
-				
-				
-				facade.registerCommand(UploaderFacade.FILE_ADDED_TO_LIST,FileListCommand);
-				facade.registerCommand(UploaderFacade.FILE_REMOVED_FROM_LIST,FileListCommand);
-				
-				facade.registerCommand(UploaderFacade.FILE_RELOAD,FileListCommand);
-				facade.registerCommand(UploaderFacade.FILE_UPLOAD,FileListCommand);
-				facade.registerCommand(UploaderFacade.FILE_REUPLOAD,FileListCommand);
-				
-				facade.registerCommand(UploaderFacade.FILE_LIST_UPLOAD,FileListCommand);
-				facade.registerCommand(UploaderFacade.FILE_LIST_CLEAR_UPLOADED,FileListCommand);
-				facade.registerCommand(UploaderFacade.FILE_LIST_CLEAR_ERRORED,FileListCommand);
-				
-				facade.registerCommand(UploaderFacade.BROWSE_FILE_INIT,FileBrowseCommand);
-				facade.registerCommand(UploaderFacade.BROWSE_FILE_SELECT,FileBrowseCommand);
-				facade.registerCommand(UploaderFacade.BROWSE_FILE_CANCEL,FileBrowseCommand);
-				
-				facade.registerCommand(UploaderFacade.FILE_LOAD_BEGIN,FileOperateCommand);
-				facade.registerCommand(UploaderFacade.FILE_LOAD_PROGRESS,FileOperateCommand);
-				facade.registerCommand(UploaderFacade.FILE_LOAD_COMPLETE,FileOperateCommand);
-				facade.registerCommand(UploaderFacade.FILE_LOAD_ERROR,FileOperateCommand);
-				
-				facade.registerCommand(UploaderFacade.FILE_PARSE_BEGIN,FileOperateCommand);
-				facade.registerCommand(UploaderFacade.FILE_PARSE_PROGRESS,FileOperateCommand);
-				facade.registerCommand(UploaderFacade.FILE_PARSE_COMPLETE,FileOperateCommand);
-				facade.registerCommand(UploaderFacade.FILE_PARSE_ERROR,FileOperateCommand);
-				
-				facade.registerCommand(UploaderFacade.FILE_UPLOAD_BEGIN,FileOperateCommand);
-				facade.registerCommand(UploaderFacade.FILE_UPLOAD_PROGRESS,FileOperateCommand);
-				facade.registerCommand(UploaderFacade.FILE_UPLOAD_COMPLETE,FileOperateCommand);
-				facade.registerCommand(UploaderFacade.FILE_UPLOAD_ERROR,FileOperateCommand);
-				
-				facade.registerCommand(UploaderFacade.FILE_STATE_CHANGE,FileOperateCommand);
-				facade.registerCommand(UploaderFacade.FILE_PHASE_CHANGE,FileOperateCommand);
+				facade.registerCommand(UploaderFacade.START_UP,StartupCommand);
+				facade.sendNotification(UploaderFacade.START_UP,this);
 			}
-			
 		]]>
 	</fx:Script>
-	<s:BorderContainer width="100%" height="100%" cornerRadius="5" borderColor="0x666666">
+	<s:BorderContainer width="100%" height="100%" cornerRadius="5" borderColor="0x3399CC" backgroundColor="0xE5E5E5" backgroundAlpha="0.2">
 		<s:VGroup paddingBottom="8" paddingTop="8" paddingLeft="8" paddingRight="8" width="100%" height="100%" gap="8">
 			<s:Button id="browseBtn" label="添加图片" />
 			<s:Line width="100%">
 				<s:stroke>
-					<s:SolidColorStroke color="0x999999"/>
+					<s:SolidColorStroke color="0x3399CC"/>
 				</s:stroke>
 			</s:Line>
 			<s:Scroller width="100%" height="100%">
@@ -91,10 +45,10 @@
 			</s:Scroller>
 			<s:Line width="100%">
 				<s:stroke>
-					<s:SolidColorStroke color="0x999999"/>
+					<s:SolidColorStroke color="0x3399CC"/>
 				</s:stroke>
 			</s:Line>
-			<s:HGroup width="100%" verticalAlign="middle" gap="8" horizontalAlign="right" >
+			<s:HGroup width="100%" verticalAlign="middle" gap="8" horizontalAlign="right">
 				<s:Button id="uploadBtn" label="上传图片"/>
 				<s:Label id="clearUploadedBtn" text="清除已上传" textDecoration="underline" color="0x666666" buttonMode="true" useHandCursor="true" />
 				<s:Label id="clearErroredBtn" text="清除错误" textDecoration="underline" color="0x666666" buttonMode="true" useHandCursor="true" />

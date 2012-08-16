@@ -140,8 +140,7 @@ package sxf.apps.imageuploader.mvc.model
 			var file:FileObject = _fileList[index];
 			cancelUploadFile(file);
 		}
-		
-		
+
 		private function compareFileRef(fileRef1:FileReference,fileRef2:FileReference):Boolean
 		{
 			return(fileRef1.name == fileRef2.name && fileRef1.size == fileRef2.size && fileRef1.type == fileRef2.type && fileRef1.creationDate.getTime() == fileRef2.creationDate.getTime());

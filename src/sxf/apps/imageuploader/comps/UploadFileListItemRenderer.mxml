@@ -37,17 +37,15 @@
 
 			// API functions ////////////////////
 			
-			public function setProgressBarLabel(text:String):void{
-				
+			public function setProgressBarLabel(text:String):void
+			{
 				progressBar.label = text;
 				
 			}
 			
-			public function setItemProgress(percent:Number):void{
-				
-				progressBar.setProgress(100*percent,100);
-				
-				
+			public function setItemProgress(percent:Number):void
+			{
+				progressBar.setProgress(100*percent,100);			
 			}
 			
 			public function setStateUpdateView(state:String):void
@@ -146,43 +144,6 @@
 				}
 			}
 			
-			/* public function showItemProgress():void{
-				
-				progressBar.visible = true;
-
-			}
-			
-			public function hideItemProgress():void{
-				
-				progressBar.visible = false;
-				
-			}
-			 */
-
-			/* public function showThumb(bmpAsset:BitmapAsset):void{				
-				
-				thumbImage.source = bmpAsset;
-			
-			}
-			 */
-			/* public function setStateIndicator(bmpAsset:BitmapAsset):void{
-			
-				stateIndicator.source = bmpAsset;
-			
-			} */
-			
-			//getter setter functions////////////////////
-			
-			/* public function get prevState():String
-			{
-				return _prevState;
-			}
-			
-			public function set prevState(value:String):void
-			{
-				_prevState = value;
-			} */
-			
 			public function destroy():void{
 			
 				thumbImage.source = null;
@@ -190,14 +151,6 @@
 			
 			}
 			
-			// override functions ////////////////////
-			
-			/* override protected function getCurrentRendererState():String{
-				
-				return currentState;
-				
-			} */
-		
 
 			protected function initializeHandler(event:FlexEvent):void
 			{
@@ -206,7 +159,6 @@
 
 			protected function itemrendererStateChangeCompleteHandler(event:FlexEvent):void
 			{
-				trace("itemrendererStateChangeCompleteHandler_"+currentState);
 				var thumbImageBmpAsset:BitmapAsset;
 				var stateIndicatorBmpAsset:BitmapAsset;
 				switch(currentState)
@@ -315,7 +267,7 @@
 			<mx:ProgressBar id="progressBar" mode="manual" labelPlacement="right" />
 		</s:VGroup>
 		
-		<s:HGroup right="0" top="0">
+		<s:HGroup right="0" top="0" paddingRight="10">
 			<s:Label id="reloadBtn" text="重新加载" includeIn="loadError,parseError" />
 			<s:Label id="uploadBtn" text="上传" includeIn="parseComplete" />
 			<s:Label id="reUploadBtn" text="重新上传" includeIn="uploadAbort,uploadError" />

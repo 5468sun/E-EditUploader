@@ -22,7 +22,6 @@ package sxf.apps.imageuploader.mvc.view{
 			
 			super(NAME, viewComponent);
 
-
 		}
 		
 		override public function onRegister():void

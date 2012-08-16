@@ -7,7 +7,7 @@ package sxf.apps.imageuploader.mvc{
 		
 		public static const NAME:String = "imageUploaderFacade";
 		
-		//new
+		public static const START_UP:String = "startUp";
 		
 		public static const BROWSE_FILE_INIT:String = "browseFileInit";
 		public static const BROWSE_FILE_SELECT:String = "browseFileSelect";
@@ -42,51 +42,6 @@ package sxf.apps.imageuploader.mvc{
 		public static const FILE_LIST_UPLOAD:String = "fileListUpload";
 		public static const FILE_LIST_CLEAR_UPLOADED:String = "fileListClearUploaded";
 		public static const FILE_LIST_CLEAR_ERRORED:String = "fileListClearErrored";
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-	
-		
-		/*public static const UPLOAD_LISTED_FILE:String = "uploadListedFile";
-		public static const CLEAR_UPLOADED_FILE:String = "clearUploadedFile";
-		
-		public static const DATA_ITEMS_ADDED:String = "dataUploadItemsAdded";
-		public static const DATA_ITEM_LOADED:String = "dataUploadItemLoaded";
-		public static const DATA_ITEM_REMOVED:String = "dataUploadItemRemoved";
-		public static const DATA_ITEM_STATE_CHANGE:String = "dataUploadItemStateChange";
-		
-		public static const IMAGE_PARSE_BEGIN:String = "imageParseBegin";
-		public static const IMAGE_PARSE_PROGRESS:String = "imageParseProgress";
-		public static const IMAGE_PARSE_COMPLETE:String = "imageParseComplete";
-		public static const IMAGE_PARSE_ERROR:String = "imageParseError";
-		
-		public static const LOAD_LOCAL_FILE_BEGIN:String = "loadLocalFileBegin";
-		public static const LOAD_LOCAL_FILE_PROGRESS:String = "loadLocalFileProgress";
-		public static const LOAD_LOCAL_FILE_COMPLETE:String = "loadLocalFileComplete";
-		public static const LOAD_LOCAL_FILE_ERROR:String = "loadLocalFileError";
-		
-		public static const UPLOAD_WAIT:String = "uploadWait";
-		public static const UPLOAD_BEGIN:String = "uploadBegin";
-		public static const UPLOAD_PROGRESS:String = "uploadProgress";
-		public static const UPLOAD_COMPLETE:String = "uploadComplete";
-		public static const UPLOAD_CANCEL:String = "uploadCancel";
-		public static const UPLOAD_ERROR:String = "uploadError";
-		public static const UPLOAD_TIMEOUT:String = "uploadTimeout";*/
-		
-		
 		
 		public function UploaderFacade(){}
 		
