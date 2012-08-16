@@ -6,8 +6,9 @@
 			   xmlns:line="sxf.utils.line.*"
 			   xmlns:image="sxf.utils.image.*"
 			   xmlns:cropselector="sxf.utils.selector.cropselector.*"
-			   width="100%" height="100%" minWidth="450" minHeight="430"
-			   creationComplete="imageEditor_creationCompleteHandler(event)" name="imageEditor">
+			   width="100%" height="100%" minWidth="400" minHeight="300"
+			   creationComplete="imageEditor_creationCompleteHandler(event)" name="imageEditor"
+			   viewSourceURL="srcview/index.html">
 	<s:layout>
 		<s:VerticalLayout/>
 	</s:layout>
@@ -130,34 +131,28 @@
 	<fx:Declarations>
 		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
 	</fx:Declarations>
-	<comps:TopInfo id="topInfo" width="100%" height="20" />
-	<s:BorderContainer id="editAreaContainer" borderColor="0xcccccc" width="100%" height="100%">
-		<s:layout>
-			<s:VerticalLayout paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10"/>
-		</s:layout>
-		<s:SkinnableContainer id="editArea" width="100%" height="100%" backgroundColor="0xcccccc">
-			<comps:ImageStage id="imageStage" width="100%" height="100%" skinClass="sxf.apps.imageeditor.comps.ImageStageSkin" />
-			<!--<comps:ImageDisplay id="imageDisplay"/>-->
-			<!--<line:AntLineRectSelector id="anlineSelector" visible="false" useCustomRestrainRect="false"/>
-			<image:Cropper id="cropSelector" visible="false" useCustomRestrainRect="true"/>-->
-			<cropselector:CropSelector id="cropSelector" width="100%" height="100%" visible="false" />
+	<s:VGroup width="100%" height="100%" gap="0">
+		<comps:TopInfo id="topInfo" />
+		<s:BorderContainer id="editAreaContainer" borderColor="0xcccccc" width="100%" height="100%" cornerRadius="5">
+			<s:layout>
+				<s:VerticalLayout paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10"/>
+			</s:layout>
+			<s:SkinnableContainer id="editArea" width="100%" height="100%" backgroundColor="0xcccccc">
+				<comps:ImageStage id="imageStage" width="100%" height="100%" skinClass="sxf.apps.imageeditor.comps.ImageStageSkin" />
+				<cropselector:CropSelector id="cropSelector" width="100%" height="100%" visible="false" />
+				<!--<comps:ImgMapper id="imgMapper" right="10" top="10" />-->
+				<comps:ZoomTool right="0" bottom="0" id="zoomTool" skinClass="sxf.apps.imageeditor.comps.ZoomToolSkin" />
+			</s:SkinnableContainer>
 			
-			<!--<comps:ImgMapper id="imgMapper" right="10" top="10" />-->
-			<comps:ZoomTool right="0" bottom="0" id="zoomTool" skinClass="sxf.apps.imageeditor.comps.ZoomToolSkin" />
-		</s:SkinnableContainer>
-		
-	</s:BorderContainer>
-	<!--<comps:EditorTools id="editorTool"/>-->
-	<s:HGroup>
-		<s:Button id="cropBtn" label="裁切" width="45" />
-		<comps:FlipTool id="flipTool" skinClass="sxf.apps.imageeditor.comps.FlipToolSkin" />
-		<comps:RotateTool id="rotateTool" skinClass="sxf.apps.imageeditor.comps.RotateToolSkin" />
-		<s:Button id="loadImageBtn" label="加载图片" />
-		<s:Button id="resetImageBtn" label="复原图片" />
-	</s:HGroup>
-	<comps:CropTool id="cropTool" skinClass="sxf.apps.imageeditor.comps.CropToolSkin" visible="false" />
-	<s:HGroup>
-		
-	</s:HGroup>
+		</s:BorderContainer>
+		<s:HGroup paddingLeft="10" paddingRight="10" paddingTop="10" paddingBottom="10">
+			<s:Button id="cropBtn" label="裁切" width="45" />
+			<comps:FlipTool id="flipTool" skinClass="sxf.apps.imageeditor.comps.FlipToolSkin" />
+			<comps:RotateTool id="rotateTool" skinClass="sxf.apps.imageeditor.comps.RotateToolSkin" />
+			<s:Button id="loadImageBtn" label="加载图片" />
+			<s:Button id="resetImageBtn" label="复原图片" />
+		</s:HGroup>
+		<comps:CropTool id="cropTool" skinClass="sxf.apps.imageeditor.comps.CropToolSkin" visible="false" />
+	</s:VGroup>
 	
 </s:Application>

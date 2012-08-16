@@ -2,16 +2,14 @@
 <s:HGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
 		 xmlns:s="library://ns.adobe.com/flex/spark" 
 		 xmlns:mx="library://ns.adobe.com/flex/mx" 
-		 name="topInfo" width="100%" height="100%">
+		 name="topInfo" width="100%" paddingLeft="10" paddingRight="10" paddingTop="7" paddingBottom="7">
 	<fx:Style>
 		@namespace s "library://ns.adobe.com/flex/spark";
 		@namespace mx "library://ns.adobe.com/flex/mx";
 		.topInfoName{
-			paddingTop:8px;
 			fontFamily:"微软雅黑","黑体";
 		}
 		.topInfoValue{
-			paddingTop:8px;
 			paddingRight:25px;
 			fontFamily:"微软雅黑","黑体";
 		}
